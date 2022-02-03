@@ -1,0 +1,11 @@
+{
+  "name": "led-mapper",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx serve"
+  },
+  "author": "Jason Coon",
+  "license": "ISC"
+}
