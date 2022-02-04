@@ -1,88 +1,236 @@
+// get elements by id
+const buttonCopyCode = document.getElementById("buttonCopyCode");
+const buttonCopyCoordinates = document.getElementById("buttonCopyCoordinates");
+const buttonCopyLayout = document.getElementById("buttonCopyLayout");
+const buttonCopyPixelblaze = document.getElementById("buttonCopyPixelblaze");
+const buttonGenerateCode = document.getElementById("buttonGenerateCode");
+const buttonNextPattern = document.getElementById("buttonNextPattern");
+const buttonParseCoordinates = document.getElementById(
+  "buttonParseCoordinates"
+);
+const buttonParseLayout = document.getElementById("buttonParseLayout");
+const buttonPreviousPattern = document.getElementById("buttonPreviousPattern");
+const checkboxShowPreviewBorders = document.getElementById(
+  "checkboxShowPreviewBorders"
+);
+const checkboxShowPreviewNumbers = document.getElementById(
+  "checkboxShowPreviewNumbers"
+);
+const buttonStart = document.getElementById("buttonStart");
+const buttonStop = document.getElementById("buttonStop");
+
+const canvasPreview = document.getElementById("canvasPreview");
+
+const codeFastLED = document.getElementById("codeFastLED");
+const codeParsedCoordinates = document.getElementById("codeParsedCoordinates");
+const codeParsedLayout = document.getElementById("codeParsedLayout");
+const codePixelblaze = document.getElementById("codePixelblaze");
+const codeStats = document.getElementById("codeStats");
+
+const context = canvasPreview.getContext("2d");
+
 const form = document.getElementById("form");
 
-const textAreaInput = document.getElementById("textAreaInput");
-
-const inputWidth = document.getElementById("inputWidth");
-const inputHeight = document.getElementById("inputHeight");
 const inputCenterX = document.getElementById("inputCenterX");
 const inputCenterY = document.getElementById("inputCenterY");
-
-const codeParsedText = document.getElementById("codeParsedText");
-const codeMaps = document.getElementById("codeMaps");
-const codeStats = document.getElementById("codeStats");
-const codePixelblaze = document.getElementById("codePixelblaze");
+const inputHeight = document.getElementById("inputHeight");
+const inputWidth = document.getElementById("inputWidth");
 
 const selectPattern = document.getElementById("selectPattern");
 
-const buttonGenerateCode = document.getElementById("buttonGenerateCode");
-const buttonStart = document.getElementById("buttonStart");
-const buttonStop = document.getElementById("buttonStop");
-const buttonPreviousPattern = document.getElementById("buttonPreviousPattern");
-const buttonNextPattern = document.getElementById("buttonNextPattern");
-const buttonCopyInput = document.getElementById("buttonCopyInput");
-const buttonCopyCode = document.getElementById("buttonCopyCode");
-const buttonCopyPixelblaze = document.getElementById("buttonCopyPixelblaze");
+const textAreaCoordinates = document.getElementById("textAreaCoordinates");
+const textAreaLayout = document.getElementById("textAreaLayout");
 
-const canvasPreview = document.getElementById("canvasPreview");
-const context = canvasPreview.getContext("2d");
-
+// configure the canvas 2d context
 context.strokeStyle = "black";
 context.lineWidth = 1;
 context.textAlign = "center";
 context.textBaseline = "middle";
 
-form.onsubmit = onParseText;
+// wire up event handlers
+buttonCopyCode.onclick = onCopyCodeClick;
+buttonCopyCoordinates.onclick = onCopyCoordinatesClick;
+buttonCopyLayout.onclick = onCopyLayoutClick;
+buttonCopyPixelblaze.onclick = onCopyPixelblazeClick;
+buttonGenerateCode.onclick = onGenerateCodeClick;
+buttonNextPattern.onclick = onNextPatternClick;
+buttonParseCoordinates.onclick = onParseCoordinatesClick;
+buttonParseLayout.onclick = onParseLayoutClick;
+buttonPlayPause.onclick = onPlayPauseClick;
+buttonPreviousPattern.onclick = onPreviousPatternClick;
 
-textAreaInput.onchange = () => {
-  parseText();
-  generateCode();
-};
+checkboxShowPreviewBorders.onchange = onShowPreviewBordersChange;
+checkboxShowPreviewNumbers.onchange = onShowPreviewNumbersChange;
 
-inputCenterX.onchange = generateCode;
-inputCenterY.onchange = generateCode;
+form.onsubmit = onFormSubmit;
 
-selectPattern.onchange = onPatternChanged;
+inputCenterX.onchange = onGenerateCodeClick;
+inputCenterY.onchange = onGenerateCodeClick;
 
-buttonGenerateCode.onclick = generateCode;
-buttonStart.onclick = startPreview;
-buttonStop.onclick = stopPreview;
-buttonPreviousPattern.onclick = previousPattern;
-buttonNextPattern.onclick = nextPattern;
-buttonCopyInput.onclick = copyInput;
-buttonCopyCode.onclick = copyCode;
-buttonCopyPixelblaze.onclick = copyPixelblaze;
+selectPattern.onchange = onPatternChange;
 
+textAreaLayout.onchange = onTextLayoutChange;
+
+window.onresize = onWindowResize;
+
+// define some global variables
 let width, height, rows, leds;
 
 let minX, minY, minAngle, minRadius;
 let maxX, maxY, maxAngle, maxRadius;
 
-let running = false;
+let running = true;
+let showPreviewBorders = true;
+let showPreviewNumbers = true;
 
-function onParseText(event) {
+// event handlers
+function onCopyCodeClick() {
+  copyElementToClipboard(codeFastLED);
+
+  const div = document.getElementById("divCopyCode");
+  div.innerText = "Copied to clipboard";
+  div.className = "visible input-group-text";
+  setTimeout(() => (div.className = "invisible input-group-text"), 1000);
+}
+
+function onCopyCoordinatesClick() {
+  copyLayoutValueToClipboard(textAreaCoordinates);
+  const div = document.getElementById("divCopyCoordinates");
+  div.innerText = "Copied to clipboard";
+  div.className = "visible input-group-text";
+
+  setTimeout(() => (div.className = "invisible input-group-text"), 1000);
+}
+
+function onCopyLayoutClick() {
+  copyLayoutValueToClipboard(textAreaLayout);
+  const div = document.getElementById("divCopyLayout");
+  div.innerText = "Copied to clipboard";
+  div.className = "visible input-group-text";
+
+  setTimeout(() => (div.className = "invisible input-group-text"), 1000);
+}
+
+function onCopyPixelblazeClick() {
+  copyElementToClipboard(codePixelblaze);
+
+  const div = document.getElementById("divCopyPixelblaze");
+  div.innerText = "Copied to clipboard";
+  div.className = "visible input-group-text";
+  setTimeout(() => (div.className = "invisible input-group-text"), 1000);
+}
+
+function onFormSubmit(event) {
   event.preventDefault();
-  parseText();
+  parseLayout();
   generateCode();
 }
 
-function parseText() {
-  rows = textAreaInput.value
+function onGenerateCodeClick() {
+  generateCode();
+}
+
+function onNextPatternClick() {
+  selectPattern.selectedIndex =
+    (selectPattern.selectedIndex + 1) % selectPattern.options.length;
+  onPatternChange();
+}
+
+function onParseCoordinatesClick() {
+  parseCoordinates();
+  generateCode();
+}
+
+function onParseLayoutClick() {
+  parseLayout();
+  generateCode();
+}
+
+function onPatternChange() {
+  if (!running) window.requestAnimationFrame(render);
+}
+
+function onPlayPauseClick() {
+  running = !running;
+
+  document.getElementById("iconPlayPause").className = running
+    ? "bi bi-pause-fill"
+    : "bi bi-play-fill";
+
+  buttonPlayPause.title = running ? "Pause" : "Play";
+
+  if (running) window.requestAnimationFrame(render);
+}
+
+function onPreviousPatternClick() {
+  const newIndex =
+    (selectPattern.selectedIndex - 1) % selectPattern.options.length;
+
+  selectPattern.selectedIndex =
+    newIndex > -1 ? newIndex : selectPattern.options.length - 1;
+  onPatternChange();
+}
+
+function onShowPreviewBordersChange() {
+  showPreviewBorders = !showPreviewBorders;
+
+  document.getElementById("iconShowPreviewBorders").className =
+    showPreviewBorders ? "bi bi-check-square" : "bi bi-square";
+
+  window.requestAnimationFrame(render);
+}
+
+function onShowPreviewNumbersChange() {
+  showPreviewNumbers = !showPreviewNumbers;
+
+  document.getElementById("iconShowPreviewNumbers").className =
+    showPreviewNumbers ? "bi bi-check-square" : "bi bi-square";
+
+  window.requestAnimationFrame(render);
+}
+
+function onTextLayoutChange() {
+  parseLayout();
+  generateCode();
+}
+
+function onWindowResize() {
+  const min = Math.min(window.innerWidth, window.innerHeight) - 48;
+
+  console.log({ min });
+
+  canvasPreview.width = min;
+  canvasPreview.height = min;
+  canvasPreview.style.width = `${min}px`;
+  canvasPreview.style.height = `${min}px`;
+}
+
+// functions
+function copyElementToClipboard(element) {
+  var range = document.createRange();
+  range.selectNode(element);
+  window.getSelection().removeAllRanges(); // clear current selection
+  window.getSelection().addRange(range); // to select text
+  document.execCommand("copy");
+}
+
+function copyLayoutValueToClipboard(element) {
+  element.select();
+
+  element.select();
+  element.setSelectionRange(0, 99999); /* For mobile devices */
+
+  /* Copy the text inside the text field */
+  navigator.clipboard.writeText(element.value);
+}
+
+function parseCoordinates() {
+  rows = textAreaCoordinates.value
     ?.split("\n")
     .map((line) => line.split("\t").map((s) => parseInt(s)));
 
-  // codeParsedText.innerText = JSON.stringify(rows, null, 2);
-  codeParsedText.innerText = JSON.stringify(rows);
+  codeParsedCoordinates.innerText = JSON.stringify(rows);
 
-  width = rows?.[0]?.length;
-  height = rows?.length;
-
-  inputWidth.value = width;
-  inputHeight.value = height;
-  inputCenterX.value = (width - 1) / 2;
-  inputCenterY.value = (height - 1) / 2;
-}
-
-function generateCode() {
   leds = [];
   // [
   //   {
@@ -98,8 +246,97 @@ function generateCode() {
   //   }
   // }
 
-  const centerX = parseFloat(inputCenterX.value);
-  const centerY = parseFloat(inputCenterY.value);
+  minX = minY = minAngle = minRadius = 1000000;
+  maxX = maxY = maxAngle = maxRadius = -1000000;
+
+  let y = -1;
+
+  for (let r = 0; r < rows.length; r++) {
+    const row = rows[r];
+
+    if (row[0] == "i") continue;
+
+    const index = parseInt(row[0]);
+    const x = parseInt(row[1]);
+    const y = parseInt(row[2]);
+
+    if (x < minX) minX = x;
+    if (x > maxX) maxX = x;
+
+    if (y < minY) minY = y;
+    if (y > maxY) maxY = y;
+
+    leds.push({
+      index,
+      x,
+      y,
+    });
+  }
+
+  width = maxX - minX;
+  height = maxY - minY;
+  const centerX = width / 2;
+  const centerY = height / 2;
+
+  for (let led of leds) {
+    const { x, y } = led;
+
+    const radius = Math.sqrt(
+      Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2)
+    );
+    const radians = Math.atan2(centerY - y, centerX - x);
+
+    let angle = radians * (180 / Math.PI);
+    while (angle < 0) angle += 360;
+    while (angle > 360) angle -= 360;
+
+    if (angle < minAngle) minAngle = angle;
+    if (angle > maxAngle) maxAngle = angle;
+
+    if (radius < minRadius) minRadius = radius;
+    if (radius > maxRadius) maxRadius = radius;
+
+    led.radius = radius;
+    led.angle = angle;
+  }
+
+  inputWidth.value = width;
+  inputHeight.value = height;
+  inputCenterX.value = centerX;
+  inputCenterY.value = centerY;
+}
+
+function parseLayout() {
+  rows = textAreaLayout.value
+    ?.split("\n")
+    .map((line) => line.split("\t").map((s) => parseInt(s)));
+
+  codeParsedLayout.innerText = JSON.stringify(rows);
+
+  width = rows?.[0]?.length;
+  height = rows?.length;
+  const centerX = (width - 1) / 2;
+  const centerY = (height - 1) / 2;
+
+  inputWidth.value = width;
+  inputHeight.value = height;
+  inputCenterX.value = centerX;
+  inputCenterY.value = centerY;
+
+  leds = [];
+  // [
+  //   {
+  //     index: string,
+  //     x: number,
+  //     y: number,
+  //     angle: number,
+  //     radius: number,
+  //     x256: number,
+  //     y256: number,
+  //     angle256: number,
+  //     radius256: number
+  //   }
+  // }
 
   minX = minY = minAngle = minRadius = 1000000;
   maxX = maxY = maxAngle = maxRadius = -1000000;
@@ -145,7 +382,9 @@ function generateCode() {
       });
     }
   }
+}
 
+function generateCode() {
   let minX256 = (minY256 = minAngle256 = minRadius256 = 1000000);
   let maxX256 = (maxY256 = maxAngle256 = maxRadius256 = -1000000);
 
@@ -204,7 +443,7 @@ function generateCode() {
     .map((led) => led.radius256.toFixed(0))
     .join(", ")} };`;
 
-  codeMaps.innerText = [
+  codeFastLED.innerText = [
     // coordsX,
     // coordsY,
     // angles,
@@ -218,8 +457,7 @@ function generateCode() {
     radii256,
   ].join("\n");
 
-  codeStats.innerText = `Stats:
-LEDs: ${leds.length}
+  codeStats.innerText = `LEDs: ${leds.length}
 minX: ${minX}
 maxX: ${maxX}
 minY: ${minY}
@@ -247,35 +485,6 @@ function generatePixelblazeMap() {
   codePixelblaze.innerText = `[${map}]`;
 }
 
-function onPatternChanged() {
-  console.log("here");
-  if (!running) window.requestAnimationFrame(render);
-}
-
-function startPreview() {
-  running = true;
-  window.requestAnimationFrame(render);
-}
-
-function stopPreview() {
-  running = false;
-}
-
-function previousPattern() {
-  const newIndex =
-    (selectPattern.selectedIndex - 1) % selectPattern.options.length;
-
-  selectPattern.selectedIndex =
-    newIndex > -1 ? newIndex : selectPattern.options.length - 1;
-  onPatternChanged();
-}
-
-function nextPattern() {
-  selectPattern.selectedIndex =
-    (selectPattern.selectedIndex + 1) % selectPattern.options.length;
-  onPatternChanged();
-}
-
 function render(timestamp) {
   const width = canvasPreview.width;
   const height = canvasPreview.height;
@@ -289,6 +498,8 @@ function render(timestamp) {
 
   for (let led of leds || []) {
     let hue = 0;
+    let saturation = "100%";
+    let lightness = "50%";
 
     switch (selectPattern.value) {
       case "rainbow":
@@ -330,16 +541,28 @@ function render(timestamp) {
       case "northwest rainbow":
         hue = mapNumber(led.x256 + led.y256 + timestamp / 10, 0, 256, 0, 360);
         break;
+      case "white":
+        hue = 0;
+        saturation = "0%";
+        lightness = "100%";
+        break;
     }
-    context.fillStyle = `hsl(${hue}, 100%, 50%)`;
-    context.strokeRect(led.x * ratioX, led.y * ratioY, ratioX, ratioY);
+
+    if (showPreviewBorders) {
+      context.strokeRect(led.x * ratioX, led.y * ratioY, ratioX, ratioY);
+    }
+
+    context.fillStyle = `hsl(${hue}, ${saturation}, ${lightness})`;
     context.fillRect(led.x * ratioX, led.y * ratioY, ratioX, ratioY);
-    context.fillStyle = "black";
-    context.fillText(
-      led.index,
-      led.x * ratioX + ratioX / 2,
-      led.y * ratioY + ratioY / 2
-    );
+
+    if (showPreviewNumbers) {
+      context.fillStyle = "black";
+      context.fillText(
+        led.index,
+        led.x * ratioX + ratioX / 2,
+        led.y * ratioY + ratioY / 2
+      );
+    }
   }
 
   if (running) window.requestAnimationFrame(render);
@@ -349,52 +572,10 @@ function mapNumber(l, inMin, inMax, outMin, outMax) {
   return ((l - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
 }
 
-function copyInput() {
-  copyInputValueToClipboard(textAreaInput);
-  const div = document.getElementById("divCopyInput");
-  div.innerText = "Copied to clipboard";
-  div.className = "visible input-group-text";
-
-  setTimeout(() => (div.className = "invisible input-group-text"), 1000);
-}
-
-function copyCode() {
-  copyElementToClipboard(codeMaps);
-
-  const div = document.getElementById("divCopyCode");
-  div.innerText = "Copied to clipboard";
-  div.className = "visible input-group-text";
-  setTimeout(() => (div.className = "invisible input-group-text"), 1000);
-}
-
-function copyPixelblaze() {
-  copyElementToClipboard(codePixelblaze);
-
-  const div = document.getElementById("divCopyPixelblaze");
-  div.innerText = "Copied to clipboard";
-  div.className = "visible input-group-text";
-  setTimeout(() => (div.className = "invisible input-group-text"), 1000);
-}
-
-function copyInputValueToClipboard(element) {
-  element.select();
-
-  element.select();
-  element.setSelectionRange(0, 99999); /* For mobile devices */
-
-  /* Copy the text inside the text field */
-  navigator.clipboard.writeText(element.value);
-}
-
-function copyElementToClipboard(element) {
-  var range = document.createRange();
-  range.selectNode(element);
-  window.getSelection().removeAllRanges(); // clear current selection
-  window.getSelection().addRange(range); // to select text
-  document.execCommand("copy");
-}
-
-parseText();
+// initial setup function calls
+parseLayout();
 generateCode();
 
 window.requestAnimationFrame(render);
+
+onWindowResize();

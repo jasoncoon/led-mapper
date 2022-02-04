@@ -54,46 +54,12 @@
               ><i class="bi bi-twitter"></i
             ></a>
             <a
-              href="https://github.com/jasoncoon"
-              title="jasoncoon on GitHub"
-              rel="noopener noreferrer"
-              class="ms-1"
-              target="_blank"
-              ><i class="bi bi-github"></i
-            ></a>
-            <a
               href="https://www.instagram.com/jasoncoon/"
               rel="noopener noreferrer"
               title="@jasoncoon on Instagram"
               target="_blank"
               class="ms-1"
               ><i class="bi bi-instagram"></i
-            ></a>
-
-            <a
-              href="https://twitter.com/evilgeniuslab"
-              title="evilgeniuslabs.org"
-              class="ms-1 text-decoration-none text-muted"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              of Evil Genius Labs</a
-            >
-            <a
-              href="https://twitter.com/evilgeniuslab"
-              title="Follow @evilgeniuslab on Twitter"
-              class="ms-1"
-              rel="noopener noreferrer"
-              target="_blank"
-              ><i class="bi bi-twitter"></i
-            ></a>
-            <a
-              href="https://github.com/evilgeniuslabs"
-              title="evilgeniuslabs on GitHub"
-              rel="noopener noreferrer"
-              class="ms-1"
-              target="_blank"
-              ><i class="bi bi-github"></i
             ></a>
             <a
               href="https://www.youtube.com/jasoncoon"
@@ -103,23 +69,107 @@
               class="ms-1"
               ><i class="bi bi-youtube"></i
             ></a>
+
+            <a
+              href="https://twitter.com/evilgeniuslab"
+              title="evilgeniuslabs.org"
+              class="ms-1 me-2 text-decoration-none text-muted"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              of Evil Genius Labs</a
+            >|
+            <a
+              href="https://github.com/jasoncoon/led-mapper"
+              title="Source code on GitHub"
+              rel="noopener noreferrer"
+              target="_blank"
+              class="ms-1 text-decoration-none text-muted"
+              >Source Code:</a
+            >
+            <a
+              href="https://github.com/jasoncoon/led-mapper"
+              title="Source code on GitHub"
+              rel="noopener noreferrer"
+              target="_blank"
+              ><i class="bi bi-github"></i
+            ></a>
           </span>
         </div>
       </div>
     </nav>
+
     <div class="container-fluid">
-      <form class="row g-3" id="form">
-        <div class="col-12">
-          <label for="textAreaInput" class="form-label"
-            >Tab Delimited Text (copy from
-            <a
-              href="https://sheets.google.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              >Google Sheets</a
-            >)</label
+      <div class="accordion mt-1" id="accordionLayout">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingLayout">
+            <button
+              class="accordion-button text-decoration-none text-body"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#collapseLayout"
+              aria-expanded="true"
+              aria-controls="collapseLayout"
+            >
+              Tab Delimited Text Input
+            </button>
+          </h2>
+          <div
+            id="collapseLayout"
+            class="accordion-collapse collapse show"
+            aria-labelledby="headingLayout"
+            data-bs-parent="#accordionLayout"
           >
-          <textarea class="form-control" id="textAreaInput" rows="4">
+            <div class="accordion-body">
+              <h6 class="mb-2 text-muted">
+                Paste in either an LED layout or coordinates, copied from
+                <a
+                  href="https://sheets.google.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Google Sheets</a
+                >
+                or other spreadsheet in tab-delimited text format.
+              </h6>
+
+              <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button
+                    class="nav-link active"
+                    id="layout-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#layout"
+                    type="button"
+                    role="tab"
+                    aria-controls="layout"
+                    aria-selected="true"
+                  >
+                    Layout
+                  </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button
+                    class="nav-link"
+                    id="coordinates-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#coordinates"
+                    type="button"
+                    role="tab"
+                    aria-controls="Coordinates"
+                    aria-selected="false"
+                  >
+                    Coordinates
+                  </button>
+                </li>
+              </ul>
+              <div class="tab-content mt-1">
+                <div
+                  class="tab-pane fade show active"
+                  id="layout"
+                  role="tabpanel"
+                  aria-labelledby="layout-tab"
+                >
+                  <textarea class="form-control" id="textAreaLayout" rows="7">
 	0	1	2	3	4	5	6		7	8	9	10	11	12	13	
 30	29	28	27	26	25	24	23	22	21	20	19	18	17	16	15	14
 31	32	33	34	35	36	37	38	39	40	41	42	43	44	45	46	47
@@ -127,191 +177,491 @@
 65	66	67	68	69	70	71	72	73	74	75	76	77	78	79	80	81
 97	96	95	94	93	92	91	90		89	88	87	86	85	84	83	82
 	98	99	100	101	102	103				104	105	106	107	108	109	</textarea
-          >
-        </div>
-
-        <div class="col-12">
-          <div class="btn-toolbar" role="toolbar">
-            <div class="btn-group" role="group">
-              <button type="submit" class="btn btn-sm btn-outline-secondary">
-                Parse Text
-              </button>
-              <button
-                id="buttonCopyInput"
-                type="button"
-                class="btn btn-sm btn-outline-secondary"
-              >
-                Copy
-              </button>
-            </div>
-            <div class="input-group ms-2">
-              <div class="invisible input-group-text" id="divCopyInput"></div>
+                  >
+                  <div class="btn-toolbar mt-1" role="toolbar">
+                    <div class="btn-group" role="group">
+                      <button
+                        id="buttonParseLayout"
+                        type="submit"
+                        class="btn btn-sm btn-outline-secondary"
+                      >
+                        Parse Layout
+                      </button>
+                      <button
+                        id="buttonCopyLayout"
+                        type="button"
+                        class="btn btn-sm btn-outline-secondary"
+                      >
+                        Copy
+                      </button>
+                    </div>
+                    <div class="input-group ms-2">
+                      <div
+                        class="invisible input-group-text"
+                        id="divCopyLayout"
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="tab-pane fade"
+                  id="coordinates"
+                  role="tabpanel"
+                  aria-labelledby="coordinates-tab"
+                >
+                  <textarea
+                    class="form-control"
+                    id="textAreaCoordinates"
+                    rows="7"
+                  >
+i	x	y
+0	1	0
+1	2	0
+2	3	0
+3	4	0
+4	5	0
+5	6	0
+6	7	0
+7	9	0
+8	10	0
+9	11	0
+10	12	0
+11	13	0
+12	14	0
+13	15	0
+14	16	1
+15	15	1
+16	14	1
+17	13	1
+18	12	1
+19	11	1
+20	10	1
+21	9	1
+22	8	1
+23	7	1
+24	6	1
+25	5	1
+26	4	1
+27	3	1
+28	2	1
+29	1	1
+30	0	1
+31	0	2
+32	1	2
+33	2	2
+34	3	2
+35	4	2
+36	5	2
+37	6	2
+38	7	2
+39	8	2
+40	9	2
+41	10	2
+42	11	2
+43	12	2
+44	13	2
+45	14	2
+46	15	2
+47	16	2
+48	16	3
+49	15	3
+50	14	3
+51	13	3
+52	12	3
+53	11	3
+54	10	3
+55	9	3
+56	8	3
+57	7	3
+58	6	3
+59	5	3
+60	4	3
+61	3	3
+62	2	3
+63	1	3
+64	0	3
+65	0	4
+66	1	4
+67	2	4
+68	3	4
+69	4	4
+70	5	4
+71	6	4
+72	7	4
+73	8	4
+74	9	4
+75	10	4
+76	11	4
+77	12	4
+78	13	4
+79	14	4
+80	15	4
+81	16	4
+82	16	5
+83	15	5
+84	14	5
+85	13	5
+86	12	5
+87	11	5
+88	10	5
+89	9	5
+90	7	5
+91	6	5
+92	5	5
+93	4	5
+94	3	5
+95	2	5
+96	1	5
+97	0	5
+98	1	6
+99	2	6
+100	3	6
+101	4	6
+102	5	6
+103	6	6
+104	10	6
+105	11	6
+106	12	6
+107	13	6
+108	14	6
+109	15	6</textarea
+                  >
+                  <div class="btn-toolbar mt-1" role="toolbar">
+                    <div class="btn-group" role="group">
+                      <button
+                        id="buttonParseCoordinates"
+                        type="submit"
+                        class="btn btn-sm btn-outline-secondary"
+                      >
+                        Parse Coordinates
+                      </button>
+                      <button
+                        id="buttonCopyCoordinates"
+                        type="button"
+                        class="btn btn-sm btn-outline-secondary"
+                      >
+                        Copy
+                      </button>
+                    </div>
+                    <div class="input-group ms-2">
+                      <div
+                        class="invisible input-group-text"
+                        id="divCopyCoordinates"
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="col-sm-3">
-          <label for="inputWidth" class="form-label">Width</label>
-          <input class="form-control" id="inputWidth" disabled />
+      <div class="accordion mt-2" id="accordionMapInfo">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingMapInfo">
+            <button
+              class="accordion-button collapsed text-decoration-none text-body"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#collapseMapInfo"
+              aria-expanded="false"
+              aria-controls="collapseMapInfo"
+            >
+              Map Info
+            </button>
+          </h2>
+          <div
+            id="collapseMapInfo"
+            class="accordion-collapse collapse"
+            aria-labelledby="headingMapInfo"
+            data-bs-parent="#accordionMapInfo"
+          >
+            <div class="accordion-body">
+              <form class="row g-2" id="form">
+                <div class="col-sm-2">
+                  <label for="inputWidth" class="form-label">Width</label>
+                  <input class="form-control" id="inputWidth" disabled />
+                </div>
+
+                <div class="col-sm-2">
+                  <label for="inputHeight" class="form-label">Height</label>
+                  <input class="form-control" id="inputHeight" disabled />
+                </div>
+
+                <div class="col-sm-2">
+                  <label for="inputCenterX" class="form-label">Center X</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="inputCenterX"
+                    step=".5"
+                  />
+                </div>
+
+                <div class="col-sm-2">
+                  <label for="inputCenterY" class="form-label">Center Y</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="inputCenterY"
+                    step=".5"
+                  />
+                </div>
+
+                <div class="col-sm-2">
+                  <label
+                    for="buttonGenerateCode"
+                    class="form-label"
+                    style="visibility: hidden"
+                    >Generate Code</label
+                  >
+                  <button
+                    id="buttonGenerateCode"
+                    type="button"
+                    class="btn btn-sm btn-outline-secondary form-control"
+                    style="width: auto"
+                  >
+                    Generate Code
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <div class="col-sm-3">
-          <label for="inputHeight" class="form-label">Height</label>
-          <input class="form-control" id="inputHeight" disabled />
+      <div class="accordion mt-2" id="accordionFastLedMaps">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingFastLedMaps">
+            <button
+              class="accordion-button collapsed text-decoration-none text-body"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#collapseFastLedMaps"
+              aria-expanded="true"
+              aria-controls="collapseFastLedMaps"
+            >
+              FastLED Maps
+            </button>
+          </h2>
+          <div
+            id="collapseFastLedMaps"
+            class="accordion-collapse collapse"
+            aria-labelledby="headingFastLedMaps"
+            data-bs-parent="#accordionFastLedMaps"
+          >
+            <div class="accordion-body">
+              Copy this into your Arduino sketch for FastLED (<a
+                href="fastled-map-demo/fastled-map-demo.ino"
+                >example</a
+              >).
+              <pre><code id="codeFastLED"></code></pre>
+              <div class="btn-toolbar mt-1" role="toolbar">
+                <button
+                  id="buttonCopyCode"
+                  type="button"
+                  class="btn btn-sm btn-outline-secondary"
+                >
+                  Copy
+                </button>
+                <div class="input-group ms-2">
+                  <div
+                    class="invisible input-group-text"
+                    id="divCopyCode"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <div class="col-sm-3">
-          <label for="inputCenterX" class="form-label">Center X</label>
-          <input
-            type="number"
-            class="form-control"
-            id="inputCenterX"
-            step=".5"
-          />
+      <div class="accordion mt-2" id="accordionPixelblazeMaps">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingPixelblazeMaps">
+            <button
+              class="accordion-button collapsed text-decoration-none text-body"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#collapsePixelblazeMaps"
+              aria-expanded="true"
+              aria-controls="collapsePixelblazeMaps"
+            >
+              Pixelblaze XY Map
+            </button>
+          </h2>
+          <div
+            id="collapsePixelblazeMaps"
+            class="accordion-collapse collapse"
+            aria-labelledby="headingPixelblazeMaps"
+            data-bs-parent="#accordionPixelblazeMaps"
+          >
+            <div class="accordion-body">
+              <pre><code id="codePixelblaze"></code></pre>
+              <div class="btn-toolbar mt-1" role="toolbar">
+                <button
+                  id="buttonCopyPixelblaze"
+                  type="button"
+                  class="btn btn-sm btn-outline-secondary"
+                >
+                  Copy
+                </button>
+              </div>
+              <div class="input-group ms-2">
+                <div
+                  class="invisible input-group-text"
+                  id="divCopyPixelblaze"
+                ></div>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <div class="col-sm-3">
-          <label for="inputCenterY" class="form-label">Center Y</label>
-          <input
-            type="number"
-            class="form-control"
-            id="inputCenterY"
-            step=".5"
-          />
-        </div>
-
-        <div class="col-12">
+      <div class="btn-toolbar mt-3" role="toolbar">
+        <div class="input-group">
+          <div class="input-group-text">Pattern Preview</div>
+          <select id="selectPattern" class="form-control" style="width: auto">
+            <option>rainbow</option>
+            <option>clockwise rainbow</option>
+            <option>counter-clockwise rainbow</option>
+            <option selected>outward rainbow</option>
+            <option>inward rainbow</option>
+            <option>north rainbow</option>
+            <option>northeast rainbow</option>
+            <option>east rainbow</option>
+            <option>southeast rainbow</option>
+            <option>south rainbow</option>
+            <option>southwest rainbow</option>
+            <option>west rainbow</option>
+            <option>northwest rainbow</option>
+            <option>white</option>
+          </select>
           <button
-            id="buttonGenerateCode"
+            id="buttonPreviousPattern"
             type="button"
             class="btn btn-sm btn-outline-secondary"
+            title="Previous Pattern"
           >
-            Generate Code
+            <i class="bi bi-skip-backward-fill"></i>
+          </button>
+          <button
+            id="buttonNextPattern"
+            type="button"
+            class="btn btn-sm btn-outline-secondary"
+            title="Next Pattern"
+          >
+            <i class="bi bi-skip-forward-fill"></i>
           </button>
         </div>
 
-        <div class="col-12">
-          <pre><code id="codeMaps"></code></pre>
+        <div class="btn-group ms-2" role="group">
+          <button
+            id="buttonPlayPause"
+            type="button"
+            title="Pause"
+            class="btn btn-sm btn-outline-secondary"
+          >
+            <i id="iconPlayPause" class="bi bi-pause-fill"></i>
+          </button>
         </div>
 
-        <div class="col-12">
-          <div class="btn-toolbar" role="toolbar">
+        <div class="btn-group ms-2" role="group">
+          <div class="input-group-text" id="btnGroupAddon2">LED</div>
+          <input
+            type="checkbox"
+            class="btn-check"
+            id="checkboxShowPreviewNumbers"
+            autocomplete="off"
+            checked
+          />
+          <label
+            class="btn btn-outline-secondary"
+            for="checkboxShowPreviewNumbers"
+          >
+            <i id="iconShowPreviewNumbers" class="bi bi-check-square"></i>
+            Numbers</label
+          >
+
+          <input
+            type="checkbox"
+            class="btn-check"
+            id="checkboxShowPreviewBorders"
+            autocomplete="off"
+            checked
+          />
+          <label
+            class="btn btn-outline-secondary"
+            for="checkboxShowPreviewBorders"
+          >
+            <i id="iconShowPreviewBorders" class="bi bi-check-square"></i>
+            Borders</label
+          >
+        </div>
+      </div>
+    </div>
+
+    <canvas id="canvasPreview" class="mt-2 m-sm-3"></canvas>
+
+    <div class="container-fluid">
+      <div class="accordion mt-2" id="accordionParsedData">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingParsedData">
             <button
-              id="buttonCopyCode"
+              class="accordion-button collapsed text-decoration-none text-body"
               type="button"
-              class="btn btn-sm btn-outline-secondary"
+              data-bs-toggle="collapse"
+              data-bs-target="#collapseParsedData"
+              aria-expanded="true"
+              aria-controls="collapseParsedData"
             >
-              Copy
+              Parsed Data
             </button>
-            <div class="input-group ms-2">
-              <div class="invisible input-group-text" id="divCopyCode"></div>
+          </h2>
+          <div
+            id="collapseParsedData"
+            class="accordion-collapse collapse"
+            aria-labelledby="headingParsedData"
+            data-bs-parent="#accordionParsedData"
+          >
+            <div class="accordion-body">
+              Layout:
+              <pre><code id="codeParsedLayout"></code></pre>
+
+              Coordinates:
+              <pre><code id="codeParsedCoordinates"></code></pre>
             </div>
           </div>
+        </div>
+      </div>
 
-          <div class="col-12">
-            <label for="codePixelblaze" class="form-label"
-              >Pixelblaze Map</label
+      <div class="accordion mt-2" id="accordionStats">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingStats">
+            <button
+              class="accordion-button collapsed text-decoration-none text-body"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#collapseStats"
+              aria-expanded="true"
+              aria-controls="collapseStats"
             >
-            <pre><code id="codePixelblaze"></code></pre>
-          </div>
-
-          <div class="col-12">
-            <div class="btn-toolbar" role="toolbar">
-              <button
-                id="buttonCopyPixelblaze"
-                type="button"
-                class="btn btn-sm btn-outline-secondary"
-              >
-                Copy
-              </button>
-            </div>
-            <div class="input-group ms-2">
-              <div
-                class="invisible input-group-text"
-                id="divCopyPixelblaze"
-              ></div>
+              Stats
+            </button>
+          </h2>
+          <div
+            id="collapseStats"
+            class="accordion-collapse collapse"
+            aria-labelledby="headingStats"
+            data-bs-parent="#accordionStats"
+          >
+            <div class="accordion-body">
+              <pre><code id="codeStats"></code></pre>
             </div>
           </div>
         </div>
-
-        <div class="col-12">
-          <div class="btn-toolbar" role="toolbar">
-            <div class="input-group">
-              <div class="input-group-text">Pattern</div>
-              <select
-                id="selectPattern"
-                class="form-control"
-                style="width: auto"
-              >
-                <option>rainbow</option>
-                <option>clockwise rainbow</option>
-                <option>counter-clockwise rainbow</option>
-                <option selected>outward rainbow</option>
-                <option>inward rainbow</option>
-                <option>north rainbow</option>
-                <option>northeast rainbow</option>
-                <option>east rainbow</option>
-                <option>southeast rainbow</option>
-                <option>south rainbow</option>
-                <option>southwest rainbow</option>
-                <option>west rainbow</option>
-                <option>northwest rainbow</option>
-              </select>
-              <button
-                id="buttonPreviousPattern"
-                type="button"
-                class="btn btn-sm btn-outline-secondary"
-                title="Previous Pattern"
-              >
-                <i class="bi bi-skip-backward-fill"></i>
-              </button>
-              <button
-                id="buttonNextPattern"
-                type="button"
-                class="btn btn-sm btn-outline-secondary"
-                title="Next Pattern"
-              >
-                <i class="bi bi-skip-forward-fill"></i>
-              </button>
-            </div>
-
-            <div class="btn-group ms-2" role="group">
-              <button
-                id="buttonStart"
-                type="button"
-                title="Start"
-                class="btn btn-sm btn-outline-secondary"
-              >
-                <i class="bi bi-play-fill"></i>
-              </button>
-              <button
-                id="buttonStop"
-                type="button"
-                title="Pause"
-                class="btn btn-sm btn-outline-secondary"
-              >
-                <i class="bi bi-pause-fill"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-12">
-          <canvas
-            id="canvasPreview"
-            width="600"
-            height="600"
-            class="m-1"
-          ></canvas>
-        </div>
-
-        <div class="col-12">
-          <label for="codeParsedText" class="form-label">Parsed Data</label>
-          <pre><code id="codeParsedText"></code></pre>
-        </div>
-
-        <pre><code id="codeStats"></code></pre>
-      </form>
+      </div>
 
       <!-- bootstrap breakpoint debug display -->
       <!-- 
