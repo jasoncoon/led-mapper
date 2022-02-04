@@ -1,35 +1,12 @@
-// get elements by id
-const buttonCopyCode = document.getElementById("buttonCopyCode");
-const buttonCopyCoordinates = document.getElementById("buttonCopyCoordinates");
-const buttonCopyLayout = document.getElementById("buttonCopyLayout");
-const buttonCopyPixelblaze = document.getElementById("buttonCopyPixelblaze");
-const buttonGenerateCode = document.getElementById("buttonGenerateCode");
-const buttonNextPattern = document.getElementById("buttonNextPattern");
-const buttonParseCoordinates = document.getElementById(
-  "buttonParseCoordinates"
-);
-const buttonParseLayout = document.getElementById("buttonParseLayout");
-const buttonPreviousPattern = document.getElementById("buttonPreviousPattern");
-const checkboxShowPreviewBorders = document.getElementById(
-  "checkboxShowPreviewBorders"
-);
-const checkboxShowPreviewNumbers = document.getElementById(
-  "checkboxShowPreviewNumbers"
-);
-const buttonStart = document.getElementById("buttonStart");
-const buttonStop = document.getElementById("buttonStop");
+// get some elements by id
+const buttonPlayPause = document.getElementById("buttonPlayPause");
 
 const canvasPreview = document.getElementById("canvasPreview");
 
 const codeFastLED = document.getElementById("codeFastLED");
-const codeParsedCoordinates = document.getElementById("codeParsedCoordinates");
-const codeParsedLayout = document.getElementById("codeParsedLayout");
-const codePixelblaze = document.getElementById("codePixelblaze");
-const codeStats = document.getElementById("codeStats");
+const codePixelblaze = document.getElementById("codeFastLED");
 
 const context = canvasPreview.getContext("2d");
-
-const form = document.getElementById("form");
 
 const inputCenterX = document.getElementById("inputCenterX");
 const inputCenterY = document.getElementById("inputCenterY");
@@ -40,38 +17,43 @@ const selectPattern = document.getElementById("selectPattern");
 
 const textAreaCoordinates = document.getElementById("textAreaCoordinates");
 const textAreaLayout = document.getElementById("textAreaLayout");
-
-// configure the canvas 2d context
-context.strokeStyle = "black";
-context.lineWidth = 1;
-context.textAlign = "center";
-context.textBaseline = "middle";
+const textAreaPixelblaze = document.getElementById("textAreaPixelblaze");
 
 // wire up event handlers
-buttonCopyCode.onclick = onCopyCodeClick;
-buttonCopyCoordinates.onclick = onCopyCoordinatesClick;
-buttonCopyLayout.onclick = onCopyLayoutClick;
-buttonCopyPixelblaze.onclick = onCopyPixelblazeClick;
-buttonGenerateCode.onclick = onGenerateCodeClick;
-buttonNextPattern.onclick = onNextPatternClick;
-buttonParseCoordinates.onclick = onParseCoordinatesClick;
-buttonParseLayout.onclick = onParseLayoutClick;
 buttonPlayPause.onclick = onPlayPauseClick;
-buttonPreviousPattern.onclick = onPreviousPatternClick;
 
-checkboxShowPreviewBorders.onchange = onShowPreviewBordersChange;
-checkboxShowPreviewNumbers.onchange = onShowPreviewNumbersChange;
-
-form.onsubmit = onFormSubmit;
-
-inputCenterX.onchange = onGenerateCodeClick;
-inputCenterY.onchange = onGenerateCodeClick;
+inputCenterX.onchange = onGenerateCode;
+inputCenterY.onchange = onGenerateCode;
+inputPreviewFontSize.onchange = onPreviewFontSizeChange;
 
 selectPattern.onchange = onPatternChange;
 
 textAreaLayout.onchange = onTextLayoutChange;
 
 window.onresize = onWindowResize;
+
+document.getElementById("buttonCopyCode").onclick = onCopyCodeClick;
+document.getElementById("buttonCopyCoordinates").onclick = onCopyCoordinatesClick;
+document.getElementById("buttonCopyLayout").onclick = onCopyLayoutClick;
+document.getElementById("buttonCopyPixelblaze").onclick = onCopyPixelblazeClick;
+document.getElementById("buttonCopyPixelblazeInput").onclick = onCopyPixelblazeInputClick;
+document.getElementById("buttonNextPattern").onclick = onNextPatternClick;
+document.getElementById("buttonParseCoordinates").onclick = onParseCoordinatesClick;
+document.getElementById("buttonParseLayout").onclick = onParseLayoutClick;
+document.getElementById("buttonParsePixelblaze").onclick = onParsePixelblazeClick;
+document.getElementById("buttonPreviousPattern").onclick = onPreviousPatternClick;
+
+document.getElementById("checkboxShowPreviewBorders").onchange = onShowPreviewBordersChange;
+document.getElementById("checkboxShowPreviewNumbers").onchange = onShowPreviewNumbersChange;
+
+document.getElementById("form").onsubmit = onFormSubmit;
+
+// configure the canvas 2d context
+context.strokeStyle = "black";
+context.lineWidth = 1;
+context.textAlign = "center";
+context.textBaseline = "middle";
+context.font = "1px monospace";
 
 // define some global variables
 let width, height, rows, leds;
@@ -120,21 +102,29 @@ function onCopyPixelblazeClick() {
   setTimeout(() => (div.className = "invisible input-group-text"), 1000);
 }
 
+function onCopyPixelblazeInputClick() {
+  copyElementToClipboard(textAreaPixelblaze);
+
+  const div = document.getElementById("divCopyPixelblazeInput");
+  div.innerText = "Copied to clipboard";
+  div.className = "visible input-group-text";
+  setTimeout(() => (div.className = "invisible input-group-text"), 1000);
+}
+
 function onFormSubmit(event) {
   event.preventDefault();
   parseLayout();
   generateCode();
 }
 
-function onGenerateCodeClick() {
+function onGenerateCode() {
   centerX = inputCenterX.value;
   centerY = inputCenterY.value;
   generateCode();
 }
 
 function onNextPatternClick() {
-  selectPattern.selectedIndex =
-    (selectPattern.selectedIndex + 1) % selectPattern.options.length;
+  selectPattern.selectedIndex = (selectPattern.selectedIndex + 1) % selectPattern.options.length;
   onPatternChange();
 }
 
@@ -148,6 +138,11 @@ function onParseLayoutClick() {
   generateCode();
 }
 
+function onParsePixelblazeClick() {
+  parsePixelblaze();
+  generateCode();
+}
+
 function onPatternChange() {
   if (!running) window.requestAnimationFrame(render);
 }
@@ -155,29 +150,29 @@ function onPatternChange() {
 function onPlayPauseClick() {
   running = !running;
 
-  document.getElementById("iconPlayPause").className = running
-    ? "bi bi-pause-fill"
-    : "bi bi-play-fill";
+  document.getElementById("iconPlayPause").className = running ? "bi bi-pause-fill" : "bi bi-play-fill";
 
   buttonPlayPause.title = running ? "Pause" : "Play";
 
   if (running) window.requestAnimationFrame(render);
 }
 
-function onPreviousPatternClick() {
-  const newIndex =
-    (selectPattern.selectedIndex - 1) % selectPattern.options.length;
+function onPreviewFontSizeChange() {
+  context.font = `${inputPreviewFontSize.value}px monospace`;
+  window.requestAnimationFrame(render);
+}
 
-  selectPattern.selectedIndex =
-    newIndex > -1 ? newIndex : selectPattern.options.length - 1;
+function onPreviousPatternClick() {
+  const newIndex = (selectPattern.selectedIndex - 1) % selectPattern.options.length;
+
+  selectPattern.selectedIndex = newIndex > -1 ? newIndex : selectPattern.options.length - 1;
   onPatternChange();
 }
 
 function onShowPreviewBordersChange() {
   showPreviewBorders = !showPreviewBorders;
 
-  document.getElementById("iconShowPreviewBorders").className =
-    showPreviewBorders ? "bi bi-check-square" : "bi bi-square";
+  document.getElementById("iconShowPreviewBorders").className = showPreviewBorders ? "bi bi-check-square" : "bi bi-square";
 
   window.requestAnimationFrame(render);
 }
@@ -185,8 +180,9 @@ function onShowPreviewBordersChange() {
 function onShowPreviewNumbersChange() {
   showPreviewNumbers = !showPreviewNumbers;
 
-  document.getElementById("iconShowPreviewNumbers").className =
-    showPreviewNumbers ? "bi bi-check-square" : "bi bi-square";
+  document.getElementById("iconShowPreviewNumbers").className = showPreviewNumbers ? "bi bi-check-square" : "bi bi-square";
+
+  inputPreviewFontSize.disabled = !showPreviewNumbers;
 
   window.requestAnimationFrame(render);
 }
@@ -203,6 +199,10 @@ function onWindowResize() {
   canvasPreview.height = min;
   canvasPreview.style.width = `${min}px`;
   canvasPreview.style.height = `${min}px`;
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+
+  if (!running) window.requestAnimationFrame(render);
 }
 
 // functions
@@ -224,125 +224,6 @@ function copyLayoutValueToClipboard(element) {
   navigator.clipboard.writeText(element.value);
 }
 
-function parseCoordinates() {
-  rows = textAreaCoordinates.value
-    ?.split("\n")
-    .map((line) => line.split("\t").map((s) => parseFloat(s)));
-
-  codeParsedCoordinates.innerText = JSON.stringify(rows);
-
-  leds = [];
-
-  minX = minY = minAngle = minRadius = 1000000;
-  maxX = maxY = maxAngle = maxRadius = -1000000;
-
-  let y = -1;
-
-  for (let r = 0; r < rows.length; r++) {
-    const row = rows[r];
-
-    const index = parseInt(row[0]);
-    const x = row[1];
-    const y = row[2];
-
-    if (isNaN(index) || isNaN(x) || isNaN(y)) continue;
-
-    if (x < minX) minX = x;
-    if (x > maxX) maxX = x;
-
-    if (y < minY) minY = y;
-    if (y > maxY) maxY = y;
-
-    leds.push({
-      index,
-      x,
-      y,
-    });
-  }
-
-  width = maxX - minX;
-  height = maxY - minY;
-  const centerX = width / 2;
-  const centerY = height / 2;
-
-  for (let led of leds) {
-    const { x, y } = led;
-
-    const radius = Math.sqrt(
-      Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2)
-    );
-    const radians = Math.atan2(centerY - y, centerX - x);
-
-    let angle = radians * (180 / Math.PI);
-    while (angle < 0) angle += 360;
-    while (angle > 360) angle -= 360;
-
-    if (angle < minAngle) minAngle = angle;
-    if (angle > maxAngle) maxAngle = angle;
-
-    if (radius < minRadius) minRadius = radius;
-    if (radius > maxRadius) maxRadius = radius;
-
-    led.radius = radius;
-    led.angle = angle;
-  }
-
-  inputWidth.value = width;
-  inputHeight.value = height;
-  inputCenterX.value = centerX;
-  inputCenterY.value = centerY;
-}
-
-function parseLayout() {
-  rows = textAreaLayout.value
-    ?.split("\n")
-    .map((line) => line.split("\t").map((s) => parseInt(s)));
-
-  codeParsedLayout.innerText = JSON.stringify(rows);
-
-  width = rows?.[0]?.length;
-  height = rows?.length;
-
-  inputWidth.value = width;
-  inputHeight.value = height;
-
-  // calculate the center based on the layout's calculated width & height
-  const centerX = (width - 1) / 2;
-  const centerY = (height - 1) / 2;
-  inputCenterX.value = centerX;
-  inputCenterY.value = centerY;
-
-  leds = [];
-
-  minX = minY = minAngle = minRadius = 1000000;
-  maxX = maxY = maxAngle = maxRadius = -1000000;
-
-  let y = -1;
-
-  for (let y = 0; y < rows.length; y++) {
-    const row = rows[y];
-    for (let x = 0; x < row.length; x++) {
-      const cell = row[x];
-
-      if (!cell && cell !== 0) continue;
-
-      const index = parseInt(cell);
-
-      if (x < minX) minX = x;
-      if (x > maxX) maxX = x;
-
-      if (y < minY) minY = y;
-      if (y > maxY) maxY = y;
-
-      leds.push({
-        index,
-        x,
-        y,
-      });
-    }
-  }
-}
-
 function generateCode() {
   let minX256 = (minY256 = minAngle256 = minRadius256 = 1000000);
   let maxX256 = (maxY256 = maxAngle256 = maxRadius256 = -1000000);
@@ -355,9 +236,7 @@ function generateCode() {
   for (led of leds) {
     const { index, x, y } = led;
 
-    const radius = Math.sqrt(
-      Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2)
-    );
+    const radius = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
     const radians = Math.atan2(centerY - y, centerX - x);
 
     let angle = radians * (180 / Math.PI);
@@ -416,18 +295,10 @@ function generateCode() {
   //   .map((led) => led.radius.toFixed(0))
   //   .join(", ")} };`;
 
-  const coordsX256 = `byte coordsX[NUM_LEDS] = { ${leds
-    .map((led) => led.x256.toFixed(0))
-    .join(", ")} };`;
-  const coordsY256 = `byte coordsY[NUM_LEDS] = { ${leds
-    .map((led) => led.y256.toFixed(0))
-    .join(", ")} };`;
-  const angles256 = `byte angles[NUM_LEDS] = { ${leds
-    .map((led) => led.angle256.toFixed(0))
-    .join(", ")} };`;
-  const radii256 = `byte radii[NUM_LEDS] = { ${leds
-    .map((led) => led.radius256.toFixed(0))
-    .join(", ")} };`;
+  const coordsX256 = `byte coordsX[NUM_LEDS] = { ${leds.map((led) => led.x256.toFixed(0)).join(", ")} };`;
+  const coordsY256 = `byte coordsY[NUM_LEDS] = { ${leds.map((led) => led.y256.toFixed(0)).join(", ")} };`;
+  const angles256 = `byte angles[NUM_LEDS] = { ${leds.map((led) => led.angle256.toFixed(0)).join(", ")} };`;
+  const radii256 = `byte radii[NUM_LEDS] = { ${leds.map((led) => led.radius256.toFixed(0)).join(", ")} };`;
 
   codeFastLED.innerText = [
     // coordsX,
@@ -443,7 +314,7 @@ function generateCode() {
     radii256,
   ].join("\n");
 
-  codeStats.innerText = `LEDs: ${leds.length}
+  document.getElementById("codeStats").innerText = `LEDs: ${leds.length}
 minX: ${minX}
 maxX: ${maxX}
 minY: ${minY}
@@ -471,16 +342,143 @@ function generatePixelblazeMap() {
   codePixelblaze.innerText = `[${map}]`;
 }
 
+function mapNumber(l, inMin, inMax, outMin, outMax) {
+  return ((l - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
+}
+
+function parseCoordinates() {
+  rows = textAreaCoordinates.value?.split("\n").map((line) => line.split("\t").map((s) => parseFloat(s)));
+
+  document.getElementById("codeParsedCoordinates").innerText = JSON.stringify(rows);
+
+  leds = [];
+
+  minX = minY = minAngle = minRadius = 1000000;
+  maxX = maxY = maxAngle = maxRadius = -1000000;
+
+  let y = -1;
+
+  for (let row of rows) {
+    const index = parseInt(row[0]);
+    const x = row[1];
+    const y = row[2];
+
+    if (isNaN(index) || isNaN(x) || isNaN(y)) continue;
+
+    if (x < minX) minX = x;
+    if (x > maxX) maxX = x;
+
+    if (y < minY) minY = y;
+    if (y > maxY) maxY = y;
+
+    leds.push({
+      index,
+      x,
+      y,
+    });
+  }
+
+  width = maxX - minX;
+  height = maxY - minY;
+
+  inputWidth.value = width;
+  inputHeight.value = height;
+  inputCenterX.value = width / 2;
+  inputCenterY.value = height / 2;
+}
+
+function parseLayout() {
+  rows = textAreaLayout.value?.split("\n").map((line) => line.split("\t").map((s) => parseInt(s)));
+
+  document.getElementById("codeParsedLayout").innerText = JSON.stringify(rows);
+
+  leds = [];
+
+  minX = minY = minAngle = minRadius = 1000000;
+  maxX = maxY = maxAngle = maxRadius = -1000000;
+
+  let y = -1;
+
+  for (let y = 0; y < rows.length; y++) {
+    const row = rows[y];
+    for (let x = 0; x < row.length; x++) {
+      const cell = row[x];
+
+      if (!cell && cell !== 0) continue;
+
+      const index = parseInt(cell);
+
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+
+      leds.push({
+        index,
+        x,
+        y,
+      });
+    }
+  }
+
+  width = maxX - minX;
+  height = maxY - minY;
+
+  inputWidth.value = width;
+  inputHeight.value = height;
+  inputCenterX.value = width / 2;
+  inputCenterY.value = height / 2;
+}
+
+function parsePixelblaze() {
+  rows = JSON.parse(textAreaPixelblaze.value);
+
+  document.getElementById("codeParsedPixelblaze").innerText = JSON.stringify(rows);
+
+  leds = [];
+
+  minX = minY = minAngle = minRadius = 1000000;
+  maxX = maxY = maxAngle = maxRadius = -1000000;
+
+  let index = 0;
+
+  for (let row of rows) {
+    const x = row[0];
+    const y = row[1];
+
+    if (x < minX) minX = x;
+    if (x > maxX) maxX = x;
+
+    if (y < minY) minY = y;
+    if (y > maxY) maxY = y;
+
+    leds.push({
+      index: index++,
+      x,
+      y,
+    });
+  }
+
+  width = maxX - minX;
+  height = maxY - minY;
+
+  inputWidth.value = width;
+  inputHeight.value = height;
+  inputCenterX.value = width / 2;
+  inputCenterY.value = height / 2;
+}
+
 function render(timestamp) {
-  const width = canvasPreview.width;
-  const height = canvasPreview.height;
+  const canvasWidth = canvasPreview.width;
+  const canvasHeight = canvasPreview.height;
 
-  const max = maxX > maxY ? maxX : maxY;
+  const max = width > height ? width : height;
 
-  const ratioX = width / (max + 1);
-  const ratioY = height / (max + 1);
+  const ledWidth = canvasWidth / (max + 1);
+  const ledHeight = canvasHeight / (max + 1);
 
-  context.clearRect(0, 0, width, height);
+  context.clearRect(0, 0, canvasWidth, canvasHeight);
 
   for (let led of leds || []) {
     let hue = 0;
@@ -489,7 +487,7 @@ function render(timestamp) {
 
     switch (selectPattern.value) {
       case "rainbow":
-        hue = mapNumber(led.index - timestamp / 10, 0, leds.length - 1, 0, 360);
+        hue = mapNumber(led.index - timestamp / 20, 0, leds.length - 1, 0, 360);
         break;
       case "clockwise rainbow":
         hue = mapNumber(led.angle256 - timestamp / 10, 0, 256, 0, 360);
@@ -534,28 +532,23 @@ function render(timestamp) {
         break;
     }
 
+    const x = (led.x - minX) * ledWidth;
+    const y = (led.y - minY) * ledHeight;
+
     if (showPreviewBorders) {
-      context.strokeRect(led.x * ratioX, led.y * ratioY, ratioX, ratioY);
+      context.strokeRect(x, y, ledWidth, ledHeight);
     }
 
     context.fillStyle = `hsl(${hue}, ${saturation}, ${lightness})`;
-    context.fillRect(led.x * ratioX, led.y * ratioY, ratioX, ratioY);
+    context.fillRect(x, y, ledWidth, ledHeight);
 
     if (showPreviewNumbers) {
       context.fillStyle = "black";
-      context.fillText(
-        led.index,
-        led.x * ratioX + ratioX / 2,
-        led.y * ratioY + ratioY / 2
-      );
+      context.fillText(led.index, x + ledWidth / 2, y + ledHeight / 2);
     }
   }
 
   if (running) window.requestAnimationFrame(render);
-}
-
-function mapNumber(l, inMin, inMax, outMin, outMax) {
-  return ((l - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
 }
 
 // initial setup function calls
