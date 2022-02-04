@@ -199,8 +199,6 @@ function onTextLayoutChange() {
 function onWindowResize() {
   const min = Math.min(window.innerWidth, window.innerHeight) - 48;
 
-  console.log({ min });
-
   canvasPreview.width = min;
   canvasPreview.height = min;
   canvasPreview.style.width = `${min}px`;
@@ -229,7 +227,7 @@ function copyLayoutValueToClipboard(element) {
 function parseCoordinates() {
   rows = textAreaCoordinates.value
     ?.split("\n")
-    .map((line) => line.split("\t").map((s) => parseInt(s)));
+    .map((line) => line.split("\t").map((s) => parseFloat(s)));
 
   codeParsedCoordinates.innerText = JSON.stringify(rows);
 
@@ -243,11 +241,11 @@ function parseCoordinates() {
   for (let r = 0; r < rows.length; r++) {
     const row = rows[r];
 
-    if (row[0] == "i" || row[1] == "x" || row[2] == "y") continue;
-
     const index = parseInt(row[0]);
-    const x = parseInt(row[1]);
-    const y = parseInt(row[2]);
+    const x = row[1];
+    const y = row[2];
+
+    if (isNaN(index) || isNaN(x) || isNaN(y)) continue;
 
     if (x < minX) minX = x;
     if (x > maxX) maxX = x;

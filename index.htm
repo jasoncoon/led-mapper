@@ -22,6 +22,21 @@
     <link href="index.css" rel="stylesheet" />
 
     <title>LED Mapper</title>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-68S25LC05F"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-68S25LC05F");
+    </script>
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -176,6 +191,10 @@
                   role="tabpanel"
                   aria-labelledby="layout-tab"
                 >
+                  <div class="text-muted">
+                    Layout should have a unique LED index in each cell. Cells
+                    without an LED should be empty.
+                  </div>
                   <textarea class="form-control" id="textAreaLayout" rows="7">
 	0	1	2	3	4	5	6		7	8	9	10	11	12	13	
 30	29	28	27	26	25	24	23	22	21	20	19	18	17	16	15	14
@@ -216,6 +235,10 @@
                   role="tabpanel"
                   aria-labelledby="coordinates-tab"
                 >
+                  <div class="text-muted">
+                    Coordinates should have three columns: index, x, and y, with
+                    or without column headers.
+                  </div>
                   <textarea
                     class="form-control"
                     id="textAreaCoordinates"
@@ -545,12 +568,12 @@ i	x	y
                 >
                   Copy
                 </button>
-              </div>
-              <div class="input-group ms-2">
-                <div
-                  class="invisible input-group-text"
-                  id="divCopyPixelblaze"
-                ></div>
+                <div class="input-group ms-2">
+                  <div
+                    class="invisible input-group-text"
+                    id="divCopyPixelblaze"
+                  ></div>
+                </div>
               </div>
             </div>
           </div>
@@ -664,10 +687,10 @@ i	x	y
             data-bs-parent="#accordionStats"
           >
             <div class="accordion-body">
-              Layout:
+              Parsed Layout:
               <pre><code id="codeParsedLayout"></code></pre>
 
-              Coordinates:
+              Parsed Coordinates:
               <pre><code id="codeParsedCoordinates"></code></pre>
 
               Stats:
