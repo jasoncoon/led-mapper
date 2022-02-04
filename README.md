@@ -9,10 +9,13 @@ Heavily inspired by the excellent [FastLED XY Map Generator](https://macetech.gi
 The difference with this tool is that instead of generating coordinates for any "gaps", coordinates are only generated for each actual LED. So if you had an irregular/gapped matrix of 128 LEDs in a 16x16 grid, this tool would only create coordinate maps for 128 LEDs instead of 256.  This usually results in lower memory usage, but also generates coordinate maps for radius and angle.
 
 Using [Google Sheets] to create a layout:
-![Using Google Sheets to create a layout](images/google-sheets.mp4)
+
+https://user-images.githubusercontent.com/3598755/152450649-81ec3f8c-771d-4d9b-a4ab-adffb7c5ac84.mp4
+
 
 Using LED Mapper to generate maps:
-![Using LED Mapper to generate maps](images/led-mapper.mp4)
+
+https://user-images.githubusercontent.com/3598755/152450891-5d5a24d5-5bc9-4ac1-b605-20d1e7415367.mp4
 
 ---
 
@@ -78,7 +81,7 @@ To make it move/scroll:
 ```c
   leds[i] = CHSV(beat8(speed) - coordsX[i]);
 ```
-![East Rainbow](images/east-rainbow.mov)
+![East Rainbow](images/east-rainbow.gif)
 
 ---
 
@@ -86,7 +89,7 @@ To go the other direction horizontally:
 ```c
   leds[i] = CHSV(beat8(speed) + coordsX[i]);
 ```
-![West Rainbow](images/west-rainbow.mov)
+![West Rainbow](images/west-rainbow.gif)
 
 ---
 
@@ -95,7 +98,7 @@ Vertical:
   leds[i] = CHSV(beat8(speed) + coordsY[i]);
 ```
 images/north-rainbow.mov
-![North Rainbow](images/north-rainbow.mov)
+![North Rainbow](images/north-rainbow.gif)
 
 ---
 
@@ -103,7 +106,7 @@ Diagonal:
 ```c
   leds[i] = CHSV(beat8(speed) + coordsX[i] + coordsY[i]);
 ```
-![Northeast Rainbow](images/northeast-rainbow.mov)
+![Northeast Rainbow](images/northeast-rainbow.gif)
 
 ---
 
@@ -111,7 +114,7 @@ Radius (expanding/contracting):
 ```c
   leds[i] = CHSV(beat8(speed) + radii[i]);
 ```
-images/outward-rainbow.mov
+![Northeast Rainbow](images/outward-rainbow.gif)
 
 ---
 
@@ -119,7 +122,7 @@ Angle (rotating):
 ```c
   leds[i] = CHSV(beat8(speed) + angles[i]);
 ```
-![Clockwise Rainbow](images/clockwise-rainbow.mov)
+![Clockwise Rainbow](images/clockwise-rainbow.gif)
 
 [FastLED]: https://github.com/FastLED/FastLED
 [Pixelblaze]: https://www.bhencke.com/pixelblaze
