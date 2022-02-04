@@ -97,7 +97,6 @@ Vertical:
 ```c
   leds[i] = CHSV(beat8(speed) + coordsY[i]);
 ```
-images/north-rainbow.mov
 ![North Rainbow](images/north-rainbow.gif)
 
 ---
