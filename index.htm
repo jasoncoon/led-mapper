@@ -14,20 +14,14 @@
     />
 
     <!-- Bootstrap Icons -->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css"
-    />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css" />
 
     <link href="index.css" rel="stylesheet" />
 
     <title>LED Mapper</title>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=G-68S25LC05F"
-    ></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-68S25LC05F"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag() {
@@ -60,30 +54,13 @@
 
           <span class="navbar-text">
             by Jason Coon
-            <a
-              href="https://twitter.com/jasoncoon_"
-              title="Follow @jasoncoon_ on Twitter"
-              rel="noopener noreferrer"
-              target="_blank"
-              class="ms-1"
+            <a href="https://twitter.com/jasoncoon_" title="Follow @jasoncoon_ on Twitter" rel="noopener noreferrer" target="_blank" class="ms-1"
               ><i class="bi bi-twitter"></i
             ></a>
-            <a
-              href="https://www.instagram.com/jasoncoon/"
-              rel="noopener noreferrer"
-              title="@jasoncoon on Instagram"
-              target="_blank"
-              class="ms-1"
+            <a href="https://www.instagram.com/jasoncoon/" rel="noopener noreferrer" title="@jasoncoon on Instagram" target="_blank" class="ms-1"
               ><i class="bi bi-instagram"></i
             ></a>
-            <a
-              href="https://www.youtube.com/jasoncoon"
-              rel="noopener noreferrer"
-              title="YouTube"
-              target="_blank"
-              class="ms-1"
-              ><i class="bi bi-youtube"></i
-            ></a>
+            <a href="https://www.youtube.com/jasoncoon" rel="noopener noreferrer" title="YouTube" target="_blank" class="ms-1"><i class="bi bi-youtube"></i></a>
 
             <a
               href="https://twitter.com/evilgeniuslab"
@@ -102,11 +79,7 @@
               class="ms-1 text-decoration-none text-muted"
               >Source Code:</a
             >
-            <a
-              href="https://github.com/jasoncoon/led-mapper"
-              title="Source code on GitHub"
-              rel="noopener noreferrer"
-              target="_blank"
+            <a href="https://github.com/jasoncoon/led-mapper" title="Source code on GitHub" rel="noopener noreferrer" target="_blank"
               ><i class="bi bi-github"></i
             ></a>
           </span>
@@ -116,10 +89,7 @@
 
     <div class="container-fluid">
       Instructions, examples, and more information:
-      <a
-        href="https://github.com/jasoncoon/led-mapper/blob/main/README.md"
-        target="_blank"
-        rel="noopener noreferrer"
+      <a href="https://github.com/jasoncoon/led-mapper/blob/main/README.md" target="_blank" rel="noopener noreferrer"
         >https://github.com/jasoncoon/led-mapper/blob/main/README.md</a
       >
       <div class="accordion mt-1" id="accordion">
@@ -136,16 +106,9 @@
               1. Input
             </button>
           </h2>
-          <div
-            id="collapseInput"
-            class="accordion-collapse collapse show"
-            aria-labelledby="headingInput"
-            data-bs-parent="#accordion"
-          >
+          <div id="collapseInput" class="accordion-collapse collapse show" aria-labelledby="headingInput" data-bs-parent="#accordion">
             <div class="accordion-body">
-              <h6 class="mb-2 text-muted">
-                Choose one of the tabs below and paste in your input data.
-              </h6>
+              <h6 class="mb-2 text-muted">Choose one of the tabs below and paste in your input data.</h6>
 
               <ul class="nav nav-tabs" role="tablist">
                 <li class="nav-item" role="presentation">
@@ -192,23 +155,11 @@
                 </li>
               </ul>
               <div class="tab-content mt-1">
-                <div
-                  class="tab-pane fade show active"
-                  id="layout-input"
-                  role="tabpanel"
-                  aria-labelledby="layout-input-tab"
-                >
+                <div class="tab-pane fade show active" id="layout-input" role="tabpanel" aria-labelledby="layout-input-tab">
                   <div class="text-muted">
                     Paste an LED layout copied from
-                    <a
-                      href="https://sheets.google.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      >Google Sheets</a
-                    >
-                    or other spreadsheet in tab-delimited text format, with a
-                    unique LED index in each cell. Cells without an LED should
-                    be empty.
+                    <a href="https://sheets.google.com" target="_blank" rel="noopener noreferrer">Google Sheets</a>
+                    or other spreadsheet in tab-delimited text format, with a unique LED index in each cell. Cells without an LED should be empty.
                   </div>
                   <textarea class="form-control" id="textAreaLayout" rows="7">
 	0	1	2	3	4	5	6		7	8	9	10	11	12	13	
@@ -221,52 +172,21 @@
                   >
                   <div class="btn-toolbar mt-1" role="toolbar">
                     <div class="btn-group" role="group">
-                      <button
-                        id="buttonParseLayout"
-                        type="submit"
-                        class="btn btn-sm btn-outline-secondary"
-                      >
-                        Parse Layout
-                      </button>
-                      <button
-                        id="buttonCopyLayout"
-                        type="button"
-                        class="btn btn-sm btn-outline-secondary"
-                      >
-                        Copy
-                      </button>
+                      <button id="buttonParseLayout" type="submit" class="btn btn-sm btn-outline-secondary">Parse Layout</button>
+                      <button id="buttonCopyLayout" type="button" class="btn btn-sm btn-outline-secondary">Copy</button>
                     </div>
                     <div class="input-group ms-2">
-                      <div
-                        class="invisible input-group-text"
-                        id="divCopyLayout"
-                      ></div>
+                      <div class="invisible input-group-text" id="divCopyLayout"></div>
                     </div>
                   </div>
                 </div>
-                <div
-                  class="tab-pane fade"
-                  id="coordinates-input"
-                  role="tabpanel"
-                  aria-labelledby="coordinates-input-tab"
-                >
+                <div class="tab-pane fade" id="coordinates-input" role="tabpanel" aria-labelledby="coordinates-input-tab">
                   <div class="text-muted">
                     Paste coordinates copied from
-                    <a
-                      href="https://sheets.google.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      >Google Sheets</a
-                    >
-                    or other spreadsheet in tab-delimited text format. It should
-                    have three columns: index, x, and y, with or without column
-                    headers.
+                    <a href="https://sheets.google.com" target="_blank" rel="noopener noreferrer">Google Sheets</a>
+                    or other spreadsheet in tab-delimited text format. It should have three columns: index, x, and y, with or without column headers.
                   </div>
-                  <textarea
-                    class="form-control"
-                    id="textAreaCoordinates"
-                    rows="7"
-                  >
+                  <textarea class="form-control" id="textAreaCoordinates" rows="7">
 i	x	y
 0	1	0
 1	2	0
@@ -381,83 +301,32 @@ i	x	y
                   >
                   <div class="btn-toolbar mt-1" role="toolbar">
                     <div class="btn-group" role="group">
-                      <button
-                        id="buttonParseCoordinates"
-                        type="submit"
-                        class="btn btn-sm btn-outline-secondary"
-                      >
-                        Parse Coordinates
-                      </button>
-                      <button
-                        id="buttonCopyCoordinates"
-                        type="button"
-                        class="btn btn-sm btn-outline-secondary"
-                      >
-                        Copy
-                      </button>
+                      <button id="buttonParseCoordinates" type="submit" class="btn btn-sm btn-outline-secondary">Parse Coordinates</button>
+                      <button id="buttonCopyCoordinates" type="button" class="btn btn-sm btn-outline-secondary">Copy</button>
                     </div>
                     <div class="input-group ms-2">
-                      <div
-                        class="invisible input-group-text"
-                        id="divCopyCoordinates"
-                      ></div>
+                      <div class="invisible input-group-text" id="divCopyCoordinates"></div>
                     </div>
                   </div>
                 </div>
-                <div
-                  class="tab-pane fade"
-                  id="pixelblaze-input"
-                  role="tabpanel"
-                  aria-labelledby="pixelblaze-input-tab"
-                >
+                <div class="tab-pane fade" id="pixelblaze-input" role="tabpanel" aria-labelledby="pixelblaze-input-tab">
                   <div class="text-muted">
                     Paste data from your
-                    <a
-                      href="https://www.bhencke.com/mapping-in-pixelblaze"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      >Pixelblaze</a
-                    >
+                    <a href="https://www.bhencke.com/mapping-in-pixelblaze" target="_blank" rel="noopener noreferrer">Pixelblaze</a>
                     Mapper tab or
-                    <a
-                      href="http://app.bhencke.com/pixelmap.html"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      >Image mapper</a
-                    >
-                    in JSON format. It should have one array of [x,y] per LED,
-                    all in an array: [[x1,y1],[x2,y2],...] Whitespace does not
-                    matter.
+                    <a href="http://app.bhencke.com/pixelmap.html" target="_blank" rel="noopener noreferrer">Image mapper</a>
+                    in JSON format. It should have one array of [x,y] per LED, all in an array: [[x1,y1],[x2,y2],...] Whitespace does not matter.
                   </div>
-                  <textarea
-                    class="form-control"
-                    id="textAreaPixelblaze"
-                    rows="7"
-                  >
+                  <textarea class="form-control" id="textAreaPixelblaze" rows="4">
 [[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],[9,0],[10,0],[11,0],[12,0],[13,0],[14,0],[15,0],[16,1],[15,1],[14,1],[13,1],[12,1],[11,1],[10,1],[9,1],[8,1],[7,1],[6,1],[5,1],[4,1],[3,1],[2,1],[1,1],[0,1],[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[7,2],[8,2],[9,2],[10,2],[11,2],[12,2],[13,2],[14,2],[15,2],[16,2],[16,3],[15,3],[14,3],[13,3],[12,3],[11,3],[10,3],[9,3],[8,3],[7,3],[6,3],[5,3],[4,3],[3,3],[2,3],[1,3],[0,3],[0,4],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[8,4],[9,4],[10,4],[11,4],[12,4],[13,4],[14,4],[15,4],[16,4],[16,5],[15,5],[14,5],[13,5],[12,5],[11,5],[10,5],[9,5],[7,5],[6,5],[5,5],[4,5],[3,5],[2,5],[1,5],[0,5],[1,6],[2,6],[3,6],[4,6],[5,6],[6,6],[10,6],[11,6],[12,6],[13,6],[14,6],[15,6]]</textarea
                   >
                   <div class="btn-toolbar mt-1" role="toolbar">
                     <div class="btn-group" role="group">
-                      <button
-                        id="buttonParsePixelblaze"
-                        type="submit"
-                        class="btn btn-sm btn-outline-secondary"
-                      >
-                        Parse Pixelblaze Map
-                      </button>
-                      <button
-                        id="buttonCopyPixelblazeInput"
-                        type="button"
-                        class="btn btn-sm btn-outline-secondary"
-                      >
-                        Copy
-                      </button>
+                      <button id="buttonParsePixelblaze" type="submit" class="btn btn-sm btn-outline-secondary">Parse Pixelblaze Map</button>
+                      <button id="buttonCopyPixelblazeInput" type="button" class="btn btn-sm btn-outline-secondary">Copy</button>
                     </div>
                     <div class="input-group ms-2">
-                      <div
-                        class="invisible input-group-text"
-                        id="divCopyPixelblazeInput"
-                      ></div>
+                      <div class="invisible input-group-text" id="divCopyPixelblazeInput"></div>
                     </div>
                   </div>
                 </div>
@@ -479,16 +348,9 @@ i	x	y
               2. Map Configuration
             </button>
           </h2>
-          <div
-            id="collapseMapInfo"
-            class="accordion-collapse collapse"
-            aria-labelledby="headingMapInfo"
-            data-bs-parent="#accordion"
-          >
+          <div id="collapseMapInfo" class="accordion-collapse collapse" aria-labelledby="headingMapInfo" data-bs-parent="#accordion">
             <div class="accordion-body">
-              <h6 class="mb-2 text-muted">
-                Adjust the map's center coordinates, if needed.
-              </h6>
+              <h6 class="mb-2 text-muted">Adjust the map's center coordinates, if needed.</h6>
               <form class="row g-2" id="form">
                 <div class="col-sm-2">
                   <label for="inputWidth" class="form-label">Width</label>
@@ -502,22 +364,12 @@ i	x	y
 
                 <div class="col-sm-2">
                   <label for="inputCenterX" class="form-label">Center X</label>
-                  <input
-                    type="number"
-                    class="form-control"
-                    id="inputCenterX"
-                    step=".5"
-                  />
+                  <input type="number" class="form-control" id="inputCenterX" step=".5" />
                 </div>
 
                 <div class="col-sm-2">
                   <label for="inputCenterY" class="form-label">Center Y</label>
-                  <input
-                    type="number"
-                    class="form-control"
-                    id="inputCenterY"
-                    step=".5"
-                  />
+                  <input type="number" class="form-control" id="inputCenterY" step=".5" />
                 </div>
               </form>
             </div>
@@ -537,12 +389,7 @@ i	x	y
               3. Output
             </button>
           </h2>
-          <div
-            id="collapseOutput"
-            class="accordion-collapse collapse"
-            aria-labelledby="headingOutput"
-            data-bs-parent="#accordion"
-          >
+          <div id="collapseOutput" class="accordion-collapse collapse" aria-labelledby="headingOutput" data-bs-parent="#accordion">
             <div class="accordion-body">
               <ul class="nav nav-tabs" role="tablist">
                 <li class="nav-item" role="presentation">
@@ -575,82 +422,36 @@ i	x	y
                 </li>
               </ul>
               <div class="tab-content mt-1">
-                <div
-                  class="tab-pane fade show active"
-                  id="fastled-output"
-                  role="tabpanel"
-                  aria-labelledby="fastled-output-tab"
-                >
+                <div class="tab-pane fade show active" id="fastled-output" role="tabpanel" aria-labelledby="fastled-output-tab">
                   <h6 class="mb-2 text-muted">
                     Copy and paste this into your
-                    <a
-                      href="https://www.arduino.cc/en/software"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      >Arduino</a
-                    >
+                    <a href="https://www.arduino.cc/en/software" target="_blank" rel="noopener noreferrer">Arduino</a>
                     sketch for
-                    <a
-                      href="https://github.com/FastLED/FastLED"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      >FastLED</a
-                    >. Here's an
-                    <a
-                      href="https://github.com/jasoncoon/led-mapper/blob/main/fastled-map-demo/fastled-map-demo.ino"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <a href="https://github.com/FastLED/FastLED" target="_blank" rel="noopener noreferrer">FastLED</a>. Here's an
+                    <a href="https://github.com/jasoncoon/led-mapper/blob/main/fastled-map-demo/fastled-map-demo.ino" target="_blank" rel="noopener noreferrer"
                       >example sketch</a
                     >.
                   </h6>
                   <pre><code id="codeFastLED"></code></pre>
                   <div class="btn-toolbar mt-1" role="toolbar">
-                    <button
-                      id="buttonCopyCode"
-                      type="button"
-                      class="btn btn-sm btn-outline-secondary"
-                    >
-                      Copy
-                    </button>
+                    <button id="buttonCopyCode" type="button" class="btn btn-sm btn-outline-secondary">Copy</button>
                     <div class="input-group ms-2">
-                      <div
-                        class="invisible input-group-text"
-                        id="divCopyCode"
-                      ></div>
+                      <div class="invisible input-group-text" id="divCopyCode"></div>
                     </div>
                   </div>
                 </div>
 
-                <div
-                  class="tab-pane fade"
-                  id="pixelblaze-output"
-                  role="tabpanel"
-                  aria-labelledby="pixelblaze-output-tab"
-                >
+                <div class="tab-pane fade" id="pixelblaze-output" role="tabpanel" aria-labelledby="pixelblaze-output-tab">
                   <h6 class="mb-2 text-muted">
                     Copy and paste this into your
-                    <a
-                      href="https://www.bhencke.com/mapping-in-pixelblaze"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      >Pixelblaze</a
-                    >
+                    <a href="https://www.bhencke.com/mapping-in-pixelblaze" target="_blank" rel="noopener noreferrer">Pixelblaze</a>
                     Mapper tab.
                   </h6>
                   <pre><code id="codePixelblaze"></code></pre>
                   <div class="btn-toolbar mt-1" role="toolbar">
-                    <button
-                      id="buttonCopyPixelblaze"
-                      type="button"
-                      class="btn btn-sm btn-outline-secondary"
-                    >
-                      Copy
-                    </button>
+                    <button id="buttonCopyPixelblaze" type="button" class="btn btn-sm btn-outline-secondary">Copy</button>
                     <div class="input-group ms-2">
-                      <div
-                        class="invisible input-group-text"
-                        id="divCopyPixelblaze"
-                      ></div>
+                      <div class="invisible input-group-text" id="divCopyPixelblaze"></div>
                     </div>
                   </div>
                 </div>
@@ -662,7 +463,7 @@ i	x	y
 
       <div class="btn-toolbar mt-3 gap-2" role="toolbar">
         <div class="input-group">
-          <div class="input-group-text">Pattern Preview</div>
+          <div class="input-group-text">Preview</div>
           <select id="selectPattern" class="form-control" style="width: auto">
             <option>rainbow</option>
             <option>clockwise rainbow</option>
@@ -679,31 +480,16 @@ i	x	y
             <option>northwest rainbow</option>
             <option>white</option>
           </select>
-          <button
-            id="buttonPreviousPattern"
-            type="button"
-            class="btn btn-sm btn-outline-secondary"
-            title="Previous Pattern"
-          >
+          <button id="buttonPreviousPattern" type="button" class="btn btn-sm btn-outline-secondary" title="Previous Pattern">
             <i class="bi bi-skip-backward-fill"></i>
           </button>
-          <button
-            id="buttonNextPattern"
-            type="button"
-            class="btn btn-sm btn-outline-secondary"
-            title="Next Pattern"
-          >
+          <button id="buttonNextPattern" type="button" class="btn btn-sm btn-outline-secondary" title="Next Pattern">
             <i class="bi bi-skip-forward-fill"></i>
           </button>
         </div>
 
         <div class="btn-group" role="group">
-          <button
-            id="buttonPlayPause"
-            type="button"
-            title="Pause"
-            class="btn btn-sm btn-outline-secondary"
-          >
+          <button id="buttonPlayPause" type="button" title="Pause" class="btn btn-sm btn-outline-secondary">
             <i id="iconPlayPause" class="bi bi-pause-fill"></i>
           </button>
         </div>
@@ -711,32 +497,14 @@ i	x	y
         <div class="btn-group" role="group">
           <div class="input-group-text" id="btnGroupAddon2">LED</div>
 
-          <input
-            type="checkbox"
-            class="btn-check"
-            id="checkboxShowPreviewBorders"
-            autocomplete="off"
-            checked
-          />
-          <label
-            class="btn btn-outline-secondary"
-            for="checkboxShowPreviewBorders"
-          >
+          <input type="checkbox" class="btn-check" id="checkboxShowPreviewBorders" autocomplete="off" checked />
+          <label class="btn btn-outline-secondary" for="checkboxShowPreviewBorders">
             <i id="iconShowPreviewBorders" class="bi bi-check-square"></i>
             Borders</label
           >
 
-          <input
-            type="checkbox"
-            class="btn-check"
-            id="checkboxShowPreviewNumbers"
-            autocomplete="off"
-            checked
-          />
-          <label
-            class="btn btn-outline-secondary"
-            for="checkboxShowPreviewNumbers"
-          >
+          <input type="checkbox" class="btn-check" id="checkboxShowPreviewNumbers" autocomplete="off" checked />
+          <label class="btn btn-outline-secondary" for="checkboxShowPreviewNumbers">
             <i id="iconShowPreviewNumbers" class="bi bi-check-square"></i>
             Numbers</label
           >
@@ -745,14 +513,7 @@ i	x	y
         <div class="btn-group" role="group">
           <div class="input-group" title="LED Numbers Font Size">
             <div class="input-group-text">Size</div>
-            <input
-              id="inputPreviewFontSize"
-              class="form-control"
-              type="number"
-              step="0.25"
-              min="0.25"
-              value="10"
-            />
+            <input id="inputPreviewFontSize" class="form-control" type="number" step="0.25" min="0.25" value="10" style="width: 4rem" />
           </div>
         </div>
       </div>
@@ -775,12 +536,7 @@ i	x	y
               Stats & Debug Info
             </button>
           </h2>
-          <div
-            id="collapseStats"
-            class="accordion-collapse collapse"
-            aria-labelledby="headingStats"
-            data-bs-parent="#accordionStats"
-          >
+          <div id="collapseStats" class="accordion-collapse collapse" aria-labelledby="headingStats" data-bs-parent="#accordionStats">
             <div class="accordion-body">
               Parsed Layout:
               <pre><code id="codeParsedLayout"></code></pre>
