@@ -127,6 +127,8 @@ function onFormSubmit(event) {
 }
 
 function onGenerateCodeClick() {
+  centerX = inputCenterX.value;
+  centerY = inputCenterY.value;
   generateCode();
 }
 
@@ -232,19 +234,6 @@ function parseCoordinates() {
   codeParsedCoordinates.innerText = JSON.stringify(rows);
 
   leds = [];
-  // [
-  //   {
-  //     index: string,
-  //     x: number,
-  //     y: number,
-  //     angle: number,
-  //     radius: number,
-  //     x256: number,
-  //     y256: number,
-  //     angle256: number,
-  //     radius256: number
-  //   }
-  // }
 
   minX = minY = minAngle = minRadius = 1000000;
   maxX = maxY = maxAngle = maxRadius = -1000000;
@@ -254,7 +243,7 @@ function parseCoordinates() {
   for (let r = 0; r < rows.length; r++) {
     const row = rows[r];
 
-    if (row[0] == "i") continue;
+    if (row[0] == "i" || row[1] == "x" || row[2] == "y") continue;
 
     const index = parseInt(row[0]);
     const x = parseInt(row[1]);
@@ -315,28 +304,17 @@ function parseLayout() {
 
   width = rows?.[0]?.length;
   height = rows?.length;
-  const centerX = (width - 1) / 2;
-  const centerY = (height - 1) / 2;
 
   inputWidth.value = width;
   inputHeight.value = height;
+
+  // calculate the center based on the layout's calculated width & height
+  const centerX = (width - 1) / 2;
+  const centerY = (height - 1) / 2;
   inputCenterX.value = centerX;
   inputCenterY.value = centerY;
 
   leds = [];
-  // [
-  //   {
-  //     index: string,
-  //     x: number,
-  //     y: number,
-  //     angle: number,
-  //     radius: number,
-  //     x256: number,
-  //     y256: number,
-  //     angle256: number,
-  //     radius256: number
-  //   }
-  // }
 
   minX = minY = minAngle = minRadius = 1000000;
   maxX = maxY = maxAngle = maxRadius = -1000000;
@@ -352,33 +330,16 @@ function parseLayout() {
 
       const index = parseInt(cell);
 
-      const radius = Math.sqrt(
-        Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2)
-      );
-      const radians = Math.atan2(centerY - y, centerX - x);
-
-      let angle = radians * (180 / Math.PI);
-      while (angle < 0) angle += 360;
-      while (angle > 360) angle -= 360;
-
       if (x < minX) minX = x;
       if (x > maxX) maxX = x;
 
       if (y < minY) minY = y;
       if (y > maxY) maxY = y;
 
-      if (angle < minAngle) minAngle = angle;
-      if (angle > maxAngle) maxAngle = angle;
-
-      if (radius < minRadius) minRadius = radius;
-      if (radius > maxRadius) maxRadius = radius;
-
       leds.push({
         index,
         x,
         y,
-        angle,
-        radius,
       });
     }
   }
@@ -387,6 +348,33 @@ function parseLayout() {
 function generateCode() {
   let minX256 = (minY256 = minAngle256 = minRadius256 = 1000000);
   let maxX256 = (maxY256 = maxAngle256 = maxRadius256 = -1000000);
+
+  // use the center defined by the user
+  const centerX = inputCenterX.value;
+  const centerY = inputCenterY.value;
+
+  // calculate the angle and radius for each LED, using the defined center
+  for (led of leds) {
+    const { index, x, y } = led;
+
+    const radius = Math.sqrt(
+      Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2)
+    );
+    const radians = Math.atan2(centerY - y, centerX - x);
+
+    let angle = radians * (180 / Math.PI);
+    while (angle < 0) angle += 360;
+    while (angle > 360) angle -= 360;
+
+    if (angle < minAngle) minAngle = angle;
+    if (angle > maxAngle) maxAngle = angle;
+
+    if (radius < minRadius) minRadius = radius;
+    if (radius > maxRadius) maxRadius = radius;
+
+    led.angle = angle;
+    led.radius = radius;
+  }
 
   for (led of leds) {
     const { x, y, angle, radius } = led;

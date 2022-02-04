@@ -100,6 +100,13 @@
     </nav>
 
     <div class="container-fluid">
+      Instructions, examples, and more information:
+      <a
+        href="https://github.com/jasoncoon/led-mapper/blob/main/README.md"
+        target="_blank"
+        rel="noopener noreferrer"
+        >https://github.com/jasoncoon/led-mapper/blob/main/README.md</a
+      >
       <div class="accordion mt-1" id="accordionLayout">
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingLayout">
@@ -111,7 +118,7 @@
               aria-expanded="true"
               aria-controls="collapseLayout"
             >
-              Tab Delimited Text Input
+              1. Tab Delimited Text Input
             </button>
           </h2>
           <div
@@ -122,7 +129,7 @@
           >
             <div class="accordion-body">
               <h6 class="mb-2 text-muted">
-                Paste in either an LED layout or coordinates, copied from
+                Paste either an LED layout or coordinates, copied from
                 <a
                   href="https://sheets.google.com"
                   target="_blank"
@@ -368,7 +375,7 @@ i	x	y
               aria-expanded="false"
               aria-controls="collapseMapInfo"
             >
-              Map Info
+              2. Map Configuration
             </button>
           </h2>
           <div
@@ -378,6 +385,9 @@ i	x	y
             data-bs-parent="#accordionMapInfo"
           >
             <div class="accordion-body">
+              <h6 class="mb-2 text-muted">
+                Adjust the map's center coordinates, if needed.
+              </h6>
               <form class="row g-2" id="form">
                 <div class="col-sm-2">
                   <label for="inputWidth" class="form-label">Width</label>
@@ -452,10 +462,28 @@ i	x	y
             data-bs-parent="#accordionFastLedMaps"
           >
             <div class="accordion-body">
-              Copy this into your Arduino sketch for FastLED (<a
-                href="fastled-map-demo/fastled-map-demo.ino"
-                >example</a
-              >).
+              <h6 class="mb-2 text-muted">
+                Copy and paste this into your
+                <a
+                  href="https://www.arduino.cc/en/software"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Arduino</a
+                >
+                sketch for
+                <a
+                  href="https://github.com/FastLED/FastLED"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >FastLED</a
+                >. Here's an
+                <a
+                  href="https://github.com/jasoncoon/led-mapper/blob/main/fastled-map-demo/fastled-map-demo.ino"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >example sketch</a
+                >.
+              </h6>
               <pre><code id="codeFastLED"></code></pre>
               <div class="btn-toolbar mt-1" role="toolbar">
                 <button
@@ -498,6 +526,16 @@ i	x	y
             data-bs-parent="#accordionPixelblazeMaps"
           >
             <div class="accordion-body">
+              <h6 class="mb-2 text-muted">
+                Copy and paste this into your
+                <a
+                  href="https://www.bhencke.com/mapping-in-pixelblaze"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Pixelblaze</a
+                >
+                Mapper tab.
+              </h6>
               <pre><code id="codePixelblaze"></code></pre>
               <div class="btn-toolbar mt-1" role="toolbar">
                 <button
@@ -605,37 +643,6 @@ i	x	y
     <canvas id="canvasPreview" class="mt-2 m-sm-3"></canvas>
 
     <div class="container-fluid">
-      <div class="accordion mt-2" id="accordionParsedData">
-        <div class="accordion-item">
-          <h2 class="accordion-header" id="headingParsedData">
-            <button
-              class="accordion-button collapsed text-decoration-none text-body"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#collapseParsedData"
-              aria-expanded="true"
-              aria-controls="collapseParsedData"
-            >
-              Parsed Data
-            </button>
-          </h2>
-          <div
-            id="collapseParsedData"
-            class="accordion-collapse collapse"
-            aria-labelledby="headingParsedData"
-            data-bs-parent="#accordionParsedData"
-          >
-            <div class="accordion-body">
-              Layout:
-              <pre><code id="codeParsedLayout"></code></pre>
-
-              Coordinates:
-              <pre><code id="codeParsedCoordinates"></code></pre>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div class="accordion mt-2" id="accordionStats">
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingStats">
@@ -647,7 +654,7 @@ i	x	y
               aria-expanded="true"
               aria-controls="collapseStats"
             >
-              Stats
+              Stats & Debug Info
             </button>
           </h2>
           <div
@@ -657,6 +664,13 @@ i	x	y
             data-bs-parent="#accordionStats"
           >
             <div class="accordion-body">
+              Layout:
+              <pre><code id="codeParsedLayout"></code></pre>
+
+              Coordinates:
+              <pre><code id="codeParsedCoordinates"></code></pre>
+
+              Stats:
               <pre><code id="codeStats"></code></pre>
             </div>
           </div>
