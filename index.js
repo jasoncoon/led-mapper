@@ -4,7 +4,7 @@ const buttonPlayPause = document.getElementById("buttonPlayPause");
 const canvasPreview = document.getElementById("canvasPreview");
 
 const codeFastLED = document.getElementById("codeFastLED");
-const codePixelblaze = document.getElementById("codeFastLED");
+const codePixelblaze = document.getElementById("codePixelblaze");
 
 const context = canvasPreview.getContext("2d");
 
