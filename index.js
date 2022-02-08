@@ -193,7 +193,8 @@ function onTextLayoutChange() {
 }
 
 function onWindowResize() {
-  const min = Math.min(window.innerWidth, window.innerHeight) - 48;
+  // const min = Math.min(window.innerWidth, window.innerHeight) - 48;
+  const min = window.innerWidth - 48;
 
   canvasPreview.width = min;
   canvasPreview.height = min;
