@@ -338,7 +338,7 @@ i	x	y
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingMapInfo">
             <button
-              class="accordion-button collapsed text-decoration-none text-body"
+              class="accordion-button text-decoration-none text-body"
               type="button"
               data-bs-toggle="collapse"
               data-bs-target="#collapseMapInfo"
@@ -348,7 +348,7 @@ i	x	y
               2. Map Configuration
             </button>
           </h2>
-          <div id="collapseMapInfo" class="accordion-collapse collapse" aria-labelledby="headingMapInfo">
+          <div id="collapseMapInfo" class="accordion-collapse collapse show" aria-labelledby="headingMapInfo">
             <div class="accordion-body">
               <h6 class="mb-2 text-muted">Adjust the map's center coordinates, if needed.</h6>
               <form class="row g-2" id="form">
@@ -379,7 +379,7 @@ i	x	y
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingOutput">
             <button
-              class="accordion-button collapsed text-decoration-none text-body"
+              class="accordion-button text-decoration-none text-body"
               type="button"
               data-bs-toggle="collapse"
               data-bs-target="#collapseOutput"
@@ -389,7 +389,7 @@ i	x	y
               3. Output
             </button>
           </h2>
-          <div id="collapseOutput" class="accordion-collapse collapse" aria-labelledby="headingOutput">
+          <div id="collapseOutput" class="accordion-collapse collapse show" aria-labelledby="headingOutput">
             <div class="accordion-body">
               <ul class="nav nav-tabs" role="tablist">
                 <li class="nav-item" role="presentation">
@@ -464,20 +464,20 @@ i	x	y
       <div class="btn-toolbar mt-3 gap-2" role="toolbar">
         <div class="input-group">
           <div class="input-group-text">Pattern</div>
-          <select id="selectPattern" class="form-control" style="width: auto">
-            <option selected>rainbow</option>
-            <option>clockwise rainbow</option>
-            <option>counter-clockwise rainbow</option>
-            <option>outward rainbow</option>
-            <option>inward rainbow</option>
-            <option>north rainbow</option>
-            <option>northeast rainbow</option>
-            <option>east rainbow</option>
-            <option>southeast rainbow</option>
-            <option>south rainbow</option>
-            <option>southwest rainbow</option>
-            <option>west rainbow</option>
-            <option>northwest rainbow</option>
+          <select id="selectPattern" class="form-control w-auto">
+            <option selected>palette</option>
+            <option>clockwise palette</option>
+            <option>counter-clockwise palette</option>
+            <option>outward palette</option>
+            <option>inward palette</option>
+            <option>north palette</option>
+            <option>northeast palette</option>
+            <option>east palette</option>
+            <option>southeast palette</option>
+            <option>south palette</option>
+            <option>southwest palette</option>
+            <option>west palette</option>
+            <option>northwest palette</option>
             <option>red</option>
             <option>green</option>
             <option>blue</option>
@@ -499,47 +499,82 @@ i	x	y
         </div>
 
         <div class="btn-group" role="group">
-          <div class="input-group-text" id="btnGroupAddon2">LED</div>
-
           <input type="checkbox" class="btn-check" id="checkboxShowPreviewBorders" autocomplete="off" checked />
           <label class="btn btn-outline-secondary" for="checkboxShowPreviewBorders">
             <i id="iconShowPreviewBorders" class="bi bi-check-square"></i>
             Borders</label
           >
+        </div>
 
+        <div class="btn-group" role="group">
           <input type="checkbox" class="btn-check" id="checkboxShowPreviewNumbers" autocomplete="off" checked />
           <label class="btn btn-outline-secondary" for="checkboxShowPreviewNumbers">
             <i id="iconShowPreviewNumbers" class="bi bi-check-square"></i>
             Numbers</label
           >
-        </div>
-
-        <div class="btn-group" role="group">
           <div class="input-group" title="LED Numbers Font Size">
             <div class="input-group-text">Size</div>
             <input id="inputPreviewFontSize" class="form-control" type="number" step="0.25" min="0.25" value="10" style="width: 5rem" />
           </div>
         </div>
+
+        <div class="btn-group" role="group">
+          <div class="input-group" title="Pattern Speed">
+            <div class="input-group-text">Speed</div>
+            <input id="inputPreviewSpeed" class="form-control" type="number" step="0.1" min="0.1" max="1.0" value="1" style="width: 5rem" />
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-toolbar mt-3 gap-2" role="toolbar">
+          <div class="input-group">
+            <div class="input-group-text">Palette</div>
+            <select id="selectPalette" class="form-control w-auto">
+              <option selected>rainbow</option>
+              <option>rainbow stripe</option>
+              <option>cloud</option>
+              <option>lava</option>
+              <option>ocean</option>
+              <option>forest</option>
+              <option>party</option>
+              <option>heat</option>
+              <option>temperature</option>
+              <option>ib_jul01</option>
+            </select>
+            <button id="buttonPreviousPalette" type="button" class="btn btn-sm btn-outline-secondary" title="Previous Palette">
+              <i class="bi bi-skip-backward-fill"></i>
+            </button>
+            <button id="buttonNextPalette" type="button" class="btn btn-sm btn-outline-secondary" title="Next Palette">
+              <i class="bi bi-skip-forward-fill"></i>
+            </button>
+          </div>
+          <canvas id="canvasSelectedPalette" width="256" height="38" style="width: 256px; height: 38px; border-radius: 4px"></textarea>
       </div>
 
       <div class="row mt-3 gap-2">
         <div class="btn-group" role="group">
           <div class="input-group" title="FastLED Code">
             <div class="input-group-text">FastLED Code</div>
-            <input id="inputPreviewCode" class="form-control" style="width: auto" />
+            <textarea id="inputPreviewCode" class="form-control w-auto" rows="1"></textarea>          
+            <button class="btn btn-outline-secondary" type="button" title="Code help" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+              ?
+            </button>
           </div>
         </div>
       </div>
 
-      <div class="row mt-3 gap-2">
-        <div class="col-12">Input parameters: i (LED index), offset (incrementing counter), coordsX, coordsY, angles, radii (number arrays)</div>
-        <div class="col-12">
-          return CHSV(hue, sat, val) or CRGB(r, g, b) all 0-255, or any
-          <a href="https://www.w3schools.com/cssref/css_colors_legal.asp" target="_blank" rel="noopener noreferrer">CSS color</a>
-        </div>
+      <div class="row mt-1">
         <div id="renderError" class="col-12 text-danger"></div>
+        <div class="collapse" id="collapseExample">
+          <div class="card card-body">
+            <div class="col-12">Input parameters: <code>i</code> (LED index), <code>offset</code> (incrementing counter), <code>coordsX</code>, <code>coordsY</code>, <code>angles</code>, <code>radii</code> (number arrays)</div>
+            <div class="col-12">
+              return <code>CHSV(hue, sat, val)</code>, <code>CRGB(r, g, b)</code>, <code>ColorFromPalette(currentPalette, index)</code>, or any
+              <a href="https://www.w3schools.com/cssref/css_colors_legal.asp" target="_blank" rel="noopener noreferrer">CSS color</a>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
 
     <canvas id="canvasPreview" class="mt-2 m-sm-3"></canvas>
 
@@ -548,7 +583,7 @@ i	x	y
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingStats">
             <button
-              class="accordion-button collapsed text-decoration-none text-body"
+              class="accordion-button text-decoration-none text-body"
               type="button"
               data-bs-toggle="collapse"
               data-bs-target="#collapseStats"
@@ -558,7 +593,7 @@ i	x	y
               Stats & Debug Info
             </button>
           </h2>
-          <div id="collapseStats" class="accordion-collapse collapse" aria-labelledby="headingStats" data-bs-parent="#accordionStats">
+          <div id="collapseStats" class="accordion-collapse collapse show" aria-labelledby="headingStats" data-bs-parent="#accordionStats">
             <div class="accordion-body">
               Parsed Layout:
               <pre><code id="codeParsedLayout"></code></pre>

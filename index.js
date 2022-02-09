@@ -2,17 +2,23 @@
 const buttonPlayPause = document.getElementById("buttonPlayPause");
 
 const canvasPreview = document.getElementById("canvasPreview");
+const canvasSelectedPalette = document.getElementById("canvasSelectedPalette");
 
 const codeFastLED = document.getElementById("codeFastLED");
 const codePixelblaze = document.getElementById("codePixelblaze");
 
 const context = canvasPreview.getContext("2d");
+const contextSelectedPalette = canvasSelectedPalette.getContext("2d");
 
 const inputCenterX = document.getElementById("inputCenterX");
 const inputCenterY = document.getElementById("inputCenterY");
 const inputHeight = document.getElementById("inputHeight");
 const inputWidth = document.getElementById("inputWidth");
+const inputPreviewCode = document.getElementById("inputPreviewCode");
+const inputPreviewFontSize = document.getElementById("inputPreviewFontSize");
+const inputPreviewSpeed = document.getElementById("inputPreviewSpeed");
 
+const selectPalette = document.getElementById("selectPalette");
 const selectPattern = document.getElementById("selectPattern");
 
 const textAreaCoordinates = document.getElementById("textAreaCoordinates");
@@ -24,13 +30,16 @@ const renderError = document.getElementById("renderError");
 // wire up event handlers
 buttonPlayPause.onclick = onPlayPauseClick;
 
-inputCenterX.onchange = onGenerateCode;
-inputCenterY.onchange = onGenerateCode;
-inputPreviewFontSize.onchange = onPreviewFontSizeChange;
+inputCenterX.oninput = onGenerateCode;
+inputCenterY.oninput = onGenerateCode;
+inputPreviewCode.oninput = onPreviewCodeChange;
+inputPreviewFontSize.oninput = onPreviewFontSizeChange;
+inputPreviewSpeed.oninput = onPreviewSpeedChange;
 
+selectPalette.onchange = onPaletteChange;
 selectPattern.onchange = onPatternChange;
 
-textAreaLayout.onchange = onTextLayoutChange;
+textAreaLayout.oninput = onTextLayoutChange;
 
 window.onresize = onWindowResize;
 
@@ -39,10 +48,12 @@ document.getElementById("buttonCopyCoordinates").onclick = onCopyCoordinatesClic
 document.getElementById("buttonCopyLayout").onclick = onCopyLayoutClick;
 document.getElementById("buttonCopyPixelblaze").onclick = onCopyPixelblazeClick;
 document.getElementById("buttonCopyPixelblazeInput").onclick = onCopyPixelblazeInputClick;
+document.getElementById("buttonNextPalette").onclick = onNextPaletteClick;
 document.getElementById("buttonNextPattern").onclick = onNextPatternClick;
 document.getElementById("buttonParseCoordinates").onclick = onParseCoordinatesClick;
 document.getElementById("buttonParseLayout").onclick = onParseLayoutClick;
 document.getElementById("buttonParsePixelblaze").onclick = onParsePixelblazeClick;
+document.getElementById("buttonPreviousPalette").onclick = onPreviousPaletteClick;
 document.getElementById("buttonPreviousPattern").onclick = onPreviousPatternClick;
 
 document.getElementById("checkboxShowPreviewBorders").onchange = onShowPreviewBordersChange;
@@ -64,11 +75,233 @@ let minX, minY, minAngle, minRadius;
 let maxX, maxY, maxAngle, maxRadius;
 
 let offset = 0;
+let offsetIncrement = 1.0;
 let coordsX, coordsY, angles, radii;
 
 let running = true;
 let showPreviewBorders = true;
 let showPreviewNumbers = true;
+
+let renderFunction = undefined;
+
+const currentPalette = null;
+
+const palettes = {
+  rainbow: [
+    "#ff0000",
+    "#ff4000",
+    "#ff8000",
+    "#ffbf00",
+    "#ffff00",
+    "#bfff00",
+    "#80ff00",
+    "#40ff00",
+    "#00ff00",
+    "#00ff40",
+    "#00ff80",
+    "#00ffbf",
+    "#00ffff",
+    "#00bfff",
+    "#0080ff",
+    "#0040ff",
+    "#0000ff",
+    "#4000ff",
+    "#8000ff",
+    "#bf00ff",
+    "#ff00ff",
+    "#ff00bf",
+    "#ff0080",
+    "#ff0040",
+    "#ff0000",
+  ],
+  "rainbow stripe": [
+    "#ff0000",
+    "#000000",
+    "#ff4000",
+    "#000000",
+    "#ff8000",
+    "#000000",
+    "#ffbf00",
+    "#000000",
+    "#ffff00",
+    "#000000",
+    "#bfff00",
+    "#000000",
+    "#80ff00",
+    "#000000",
+    "#40ff00",
+    "#000000",
+    "#00ff00",
+    "#000000",
+    "#00ff40",
+    "#000000",
+    "#00ff80",
+    "#000000",
+    "#00ffbf",
+    "#000000",
+    "#00ffff",
+    "#000000",
+    "#00bfff",
+    "#000000",
+    "#0080ff",
+    "#000000",
+    "#0040ff",
+    "#000000",
+    "#0000ff",
+    "#000000",
+    "#4000ff",
+    "#000000",
+    "#8000ff",
+    "#000000",
+    "#bf00ff",
+    "#000000",
+    "#ff00ff",
+    "#000000",
+    "#ff00bf",
+    "#000000",
+    "#ff0080",
+    "#000000",
+    "#ff0040",
+    "#000000",
+    "#ff0000",
+  ],
+  cloud: [
+    "Blue",
+    "DarkBlue",
+    "DarkBlue",
+    "DarkBlue",
+    "DarkBlue",
+    "DarkBlue",
+    "DarkBlue",
+    "DarkBlue",
+    "Blue",
+    "DarkBlue",
+    "SkyBlue",
+    "SkyBlue",
+    "LightBlue",
+    "White",
+    "LightBlue",
+    "SkyBlue",
+  ],
+  lava: ["Black", "Maroon", "Black", "Maroon", "DarkRed", "Maroon", "DarkRed", "DarkRed", "DarkRed", "Red", "Orange", "White", "Orange", "Red", "DarkRed"],
+  ocean: [
+    "MidnightBlue",
+    "DarkBlue",
+    "MidnightBlue",
+    "Navy",
+    "DarkBlue",
+    "MediumBlue",
+    "SeaGreen",
+    "Teal",
+    "CadetBlue",
+    "Blue",
+    "DarkCyan",
+    "CornflowerBlue",
+    "Aquamarine",
+    "SeaGreen",
+    "Aqua",
+    "LightSkyBlue",
+  ],
+  forest: [
+    "DarkGreen",
+    "DarkGreen",
+    "DarkOliveGreen",
+    "DarkGreen",
+    "Green",
+    "ForestGreen",
+    "OliveDrab",
+    "Green",
+    "SeaGreen",
+    "MediumAquamarine",
+    "LimeGreen",
+    "YellowGreen",
+    "LightGreen",
+    "LawnGreen",
+    "MediumAquamarine",
+    "ForestGreen",
+  ],
+  party: [
+    "#5500ab",
+    "#84007c",
+    "#b5004b",
+    "#e5001b",
+    "#e81700",
+    "#b84700",
+    "#ab7700",
+    "#abab00",
+    "#ab5500",
+    "#dd2200",
+    "#f2000e",
+    "#c2003e",
+    "#8f0071",
+    "#5f00a1",
+    "#2f00d0",
+    "#0007f9",
+  ],
+  heat: [
+    "#000000",
+    "#330000",
+    "#660000",
+    "#990000",
+    "#cc0000",
+    "#ff0000",
+    "#ff3300",
+    "#ff6600",
+    "#ff9900",
+    "#ffcc00",
+    "#ffff00",
+    "#ffff33",
+    "#ffff66",
+    "#ffff99",
+    "#ffffcc",
+    "#ffffff",
+  ],
+
+  // Gradient "cpt-city/arendal/temperature", originally from
+  // http://soliton.vm.bytemark.co.uk/pub/cpt-city/arendal/tn/temperature.png.index.html
+  temperature: [
+    "rgb( 30, 92,179)   0.000%",
+    "rgb( 30, 92,179)   5.500%",
+    "rgb( 23,111,193)   5.500%",
+    "rgb( 23,111,193)  11.170%",
+    "rgb( 11,142,216)  11.170%",
+    "rgb( 11,142,216)  16.670%",
+    "rgb(  4,161,230)  16.670%",
+    "rgb(  4,161,230)  22.170%",
+    "rgb( 25,181,241)  22.170%",
+    "rgb( 25,181,241)  27.830%",
+    "rgb( 51,188,207)  27.830%",
+    "rgb( 51,188,207)  33.330%",
+    "rgb(102,204,206)  33.330%",
+    "rgb(102,204,206)  38.830%",
+    "rgb(153,219,184)  38.830%",
+    "rgb(153,219,184)  44.500%",
+    "rgb(192,229,136)  44.500%",
+    "rgb(192,229,136)  50.000%",
+    "rgb(204,230, 75)  50.000%",
+    "rgb(204,230, 75)  55.500%",
+    "rgb(243,240, 29)  55.500%",
+    "rgb(243,240, 29)  61.170%",
+    "rgb(254,222, 39)  61.170%",
+    "rgb(254,222, 39)  66.670%",
+    "rgb(252,199,  7)  66.670%",
+    "rgb(252,199,  7)  72.170%",
+    "rgb(248,157, 14)  72.170%",
+    "rgb(248,157, 14)  77.830%",
+    "rgb(245,114, 21)  77.830%",
+    "rgb(245,114, 21)  83.330%",
+    "rgb(241, 71, 28)  83.330%",
+    "rgb(241, 71, 28)  88.830%",
+    "rgb(219, 30, 38)  88.830%",
+    "rgb(219, 30, 38)  94.500%",
+    "rgb(164, 38, 44)  94.500%",
+    "rgb(164, 38, 44) 100.000%",
+  ],
+
+  // Gradient "cpt-city/ing/xmas/ib_jul01", originally from
+  // http://soliton.vm.bytemark.co.uk/pub/cpt-city/ing/xmas/tn/ib_jul01.png.index.html
+  ib_jul01: ["rgb(230,  6, 17)   0.000%", "rgb( 37, 96, 90)  37.010%", "rgb(144,189,106)  52.000%", "rgb(187,  3, 13) 100.000%"],
+};
 
 // event handlers
 function onCopyCodeClick() {
@@ -128,6 +361,11 @@ function onGenerateCode() {
   generateCode();
 }
 
+function onNextPaletteClick() {
+  selectPalette.selectedIndex = (selectPalette.selectedIndex + 1) % selectPalette.options.length;
+  onPaletteChange();
+}
+
 function onNextPatternClick() {
   selectPattern.selectedIndex = (selectPattern.selectedIndex + 1) % selectPattern.options.length;
   onPatternChange();
@@ -148,48 +386,71 @@ function onParsePixelblazeClick() {
   generateCode();
 }
 
+function onPaletteChange() {
+  const paletteName = selectPalette.value;
+  const palette = palettes[paletteName];
+  if (!palette) return;
+  const gradient = contextSelectedPalette.createLinearGradient(0, 0, canvasSelectedPalette.width, 0);
+  let offset = 0;
+  const offsetIncrement = 1.0 / palette.length;
+  palette.forEach((color) => {
+    if (color.endsWith("%")) {
+      const parts = color.split(")");
+      color = parts[0] + ")";
+      let percent = parts[parts.length - 1];
+      percent = percent.substring(0, percent.length - 2);
+      offset = parseFloat(percent) / 100.0;
+    }
+    gradient.addColorStop(offset, color);
+    offset += offsetIncrement;
+  });
+  contextSelectedPalette.fillStyle = gradient;
+  contextSelectedPalette.fillRect(0, 0, canvasSelectedPalette.width, canvasSelectedPalette.height);
+  if (!running) window.requestAnimationFrame(render);
+}
+
 function onPatternChange() {
   let code;
 
   switch (selectPattern.value) {
-    case "rainbow":
-      code = "return CHSV(i - offset, 255, 255)";
+    case "palette":
+      code = "return ColorFromPalette(currentPalette, i - offset);";
       break;
-    case "clockwise rainbow":
-      code = "return CHSV(angles[i] - offset, 255, 255);";
+    case "clockwise palette":
+      code = "return ColorFromPalette(currentPalette, angles[i] - offset);";
       break;
-    case "counter-clockwise rainbow":
-      code = "return CHSV(angles[i] + offset, 255, 255);";
+    case "counter-clockwise palette":
+      code = "return ColorFromPalette(currentPalette, angles[i] + offset);";
       break;
-    case "outward rainbow":
-      code = "return CHSV(radii[i] - offset, 255, 255);";
+    case "outward palette":
+      code = "return ColorFromPalette(currentPalette, radii[i] - offset);";
       break;
-    case "inward rainbow":
-      code = "return CHSV(radii[i] + offset, 255, 255);";
+    case "inward palette":
+      code = "return ColorFromPalette(currentPalette, radii[i] + offset);";
       break;
-    case "north rainbow":
-      code = "return CHSV(coordsY[i] + offset, 255, 255);";
+    case "north palette":
+      code = "return ColorFromPalette(currentPalette, coordsY[i] + offset);";
       break;
-    case "northeast rainbow":
-      code = "return CHSV(coordsX[i] - coordsY[i] - offset, 255, 255);";
+    case "northeast palette":
+      code = "return ColorFromPalette(currentPalette, coordsX[i] - coordsY[i] - offset);";
       break;
-    case "east rainbow":
-      code = "return CHSV(coordsX[i] - offset, 255, 255);";
+    case "east palette":
+      code = "return ColorFromPalette(currentPalette, coordsX[i] - offset);";
       break;
-    case "southeast rainbow":
-      code = "return CHSV(coordsX[i] + coordsY[i] - offset, 255, 255);";
+    case "southeast palette":
+      code = "return ColorFromPalette(currentPalette, coordsX[i] + coordsY[i] - offset);";
       break;
-    case "south rainbow":
-      code = "return CHSV(coordsY[i] - offset, 255, 255);";
+    case "south palette":
+      code = "return ColorFromPalette(currentPalette, coordsY[i] - offset);";
       break;
-    case "southwest rainbow":
-      code = "return CHSV(coordsX[i] - coordsY[i] + offset, 255, 255);";
+    case "southwest palette":
+      code = "return ColorFromPalette(currentPalette, coordsX[i] - coordsY[i] + offset);";
       break;
-    case "west rainbow":
-      code = "return CHSV(coordsX[i] + offset, 255, 255);";
+    case "west palette":
+      code = "return ColorFromPalette(currentPalette, coordsX[i] + offset);";
       break;
-    case "northwest rainbow":
-      code = "return CHSV(coordsX[i] + coordsY[i] + offset, 255, 255);";
+    case "northwest palette":
+      code = "return ColorFromPalette(currentPalette, coordsX[i] + coordsY[i] + offset);";
       break;
     case "red":
       code = "return CRGB(255, 0, 0)";
@@ -208,18 +469,45 @@ function onPatternChange() {
       break;
   }
 
-  document.getElementById("inputPreviewCode").value = code;
+  inputPreviewCode.value = code;
+  onPreviewCodeChange();
   if (!running) window.requestAnimationFrame(render);
 }
 
 function onPlayPauseClick() {
   setRunning(!running);
-  buttonPlayPause.className = "btn btn-sm btn-outline-secondary";
+}
+
+function onPreviewCodeChange() {
+  const code = inputPreviewCode.value;
+
+  renderFunction = undefined;
+
+  renderError.innerText = "";
+
+  try {
+    renderFunction = Function("i", "coordsX", "coordsY", "angles", "radii", code);
+    if (!running) window.requestAnimationFrame(render);
+  } catch (error) {
+    handleRenderFunctionError(error);
+    return;
+  }
 }
 
 function onPreviewFontSizeChange() {
   context.font = `${inputPreviewFontSize.value}px monospace`;
-  window.requestAnimationFrame(render);
+  if (!running) window.requestAnimationFrame(render);
+}
+
+function onPreviewSpeedChange() {
+  offsetIncrement = parseFloat(inputPreviewSpeed.value) || 1.0;
+}
+
+function onPreviousPaletteClick() {
+  const newIndex = (selectPalette.selectedIndex - 1) % selectPalette.options.length;
+
+  selectPalette.selectedIndex = newIndex > -1 ? newIndex : selectPalette.options.length - 1;
+  onPaletteChange();
 }
 
 function onPreviousPatternClick() {
@@ -234,7 +522,7 @@ function onShowPreviewBordersChange() {
 
   document.getElementById("iconShowPreviewBorders").className = showPreviewBorders ? "bi bi-check-square" : "bi bi-square";
 
-  window.requestAnimationFrame(render);
+  if (!running) window.requestAnimationFrame(render);
 }
 
 function onShowPreviewNumbersChange() {
@@ -244,7 +532,7 @@ function onShowPreviewNumbersChange() {
 
   inputPreviewFontSize.disabled = !showPreviewNumbers;
 
-  window.requestAnimationFrame(render);
+  if (!running) window.requestAnimationFrame(render);
 }
 
 function onTextLayoutChange() {
@@ -302,6 +590,15 @@ function hsvToRgb(h, s, v) {
     g: Math.round(g * 255),
     b: Math.round(b * 255),
   };
+}
+
+function ColorFromPalette(palette, index) {
+  while (index > 255) index -= 256;
+  while (index < 0) index += 256;
+  const imageData = contextSelectedPalette.getImageData(index, 0, canvasSelectedPalette.width, canvasSelectedPalette.height);
+  const data = imageData.data;
+  const color = `rgb(${data[0]}, ${data[1]}, ${data[2]})`;
+  return color;
 }
 
 function CHSV(hue, saturation, value) {
@@ -579,14 +876,15 @@ function parsePixelblaze() {
 }
 
 function handleRenderFunctionError(error) {
+  renderFunction = undefined;
   console.error({ error });
-  setRunning(false);
-  renderError.innerText = `Error: ${error.message}. Fix and click the Play button.`;
-  buttonPlayPause.className = "btn btn-sm btn-outline-danger";
+  renderError.innerText = `Error: ${error.message}.`;
 }
 
-function render(timestamp) {
-  offset += 1;
+function render() {
+  if (renderFunction === undefined) return;
+
+  offset += offsetIncrement;
   if (offset > 255) offset = 0;
   const canvasWidth = canvasPreview.width;
   const canvasHeight = canvasPreview.height;
@@ -598,24 +896,11 @@ function render(timestamp) {
 
   context.clearRect(0, 0, canvasWidth, canvasHeight);
 
-  const code = `${document.getElementById("inputPreviewCode").value}`;
-
-  let renderFunc = undefined;
-
-  renderError.innerText = "";
-
-  try {
-    renderFunc = Function("i", "coordsX", "coordsY", "angles", "radii", code);
-  } catch (error) {
-    handleRenderFunctionError(error);
-    return;
-  }
-
   for (let led of leds || []) {
     let fillStyle;
 
     try {
-      fillStyle = renderFunc(led.index, coordsX, coordsY, angles, radii);
+      fillStyle = renderFunction(led.index, coordsX, coordsY, angles, radii);
     } catch (error) {
       handleRenderFunctionError(error);
       return;
@@ -653,6 +938,7 @@ function setRunning(value) {
 parseLayout();
 generateCode();
 onPatternChange();
+onPaletteChange();
 window.requestAnimationFrame(render);
 
 onWindowResize();
