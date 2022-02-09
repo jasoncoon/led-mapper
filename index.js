@@ -19,6 +19,8 @@ const textAreaCoordinates = document.getElementById("textAreaCoordinates");
 const textAreaLayout = document.getElementById("textAreaLayout");
 const textAreaPixelblaze = document.getElementById("textAreaPixelblaze");
 
+const renderError = document.getElementById("renderError");
+
 // wire up event handlers
 buttonPlayPause.onclick = onPlayPauseClick;
 
@@ -143,18 +145,79 @@ function onParsePixelblazeClick() {
   generateCode();
 }
 
+let offset = 0;
+
 function onPatternChange() {
+  let code;
+
+  let saturation = "100%";
+  let lightness = "50%";
+
+  switch (selectPattern.value) {
+    case "rainbow":
+      // code = "return `hsl(${mapNumber(led.index - timestamp / 20, 0, leds.length - 1, 0, 360)}, 100%, 50%)`;";
+      code = "return CHSV(i - offset, 255, 255)";
+      break;
+    case "clockwise rainbow":
+      code = "return CHSV(angle - offset, 255, 255);";
+      break;
+    case "counter-clockwise rainbow":
+      code = "return CHSV(angle + offset, 255, 255);";
+      break;
+    case "outward rainbow":
+      code = "return CHSV(radius - offset, 255, 255);";
+      break;
+    case "inward rainbow":
+      code = "return CHSV(radius + offset, 255, 255);";
+      break;
+    case "north rainbow":
+      code = "return CHSV(y + offset, 255, 255);";
+      break;
+    case "northeast rainbow":
+      code = "return CHSV(x - y - offset, 255, 255);";
+      break;
+    case "east rainbow":
+      code = "return CHSV(x - offset, 255, 255);";
+      break;
+    case "southeast rainbow":
+      code = "return CHSV(x + y - offset, 255, 255);";
+      break;
+    case "south rainbow":
+      code = "return CHSV(y - offset, 255, 255);";
+      break;
+    case "southwest rainbow":
+      code = "return CHSV(x - y + offset, 255, 255);";
+      break;
+    case "west rainbow":
+      code = "return CHSV(x + offset, 255, 255);";
+      break;
+    case "northwest rainbow":
+      code = "return CHSV(x + y + offset, 255, 255);";
+      break;
+    case "red":
+      code = "return CRGB(255, 0, 0)";
+      break;
+    case "green":
+      code = "return CRGB(0, 255, 0)";
+      break;
+    case "blue":
+      code = "return CRGB(0, 0, 255)";
+      break;
+    case "white":
+      code = "return CRGB(255, 255, 255)";
+      break;
+    case "custom":
+      code = "";
+      break;
+  }
+
+  document.getElementById("inputPreviewCode").value = code;
   if (!running) window.requestAnimationFrame(render);
 }
 
 function onPlayPauseClick() {
-  running = !running;
-
-  document.getElementById("iconPlayPause").className = running ? "bi bi-pause-fill" : "bi bi-play-fill";
-
-  buttonPlayPause.title = running ? "Pause" : "Play";
-
-  if (running) window.requestAnimationFrame(render);
+  setRunning(!running);
+  buttonPlayPause.className = "btn btn-sm btn-outline-secondary";
 }
 
 function onPreviewFontSizeChange() {
@@ -207,6 +270,62 @@ function onWindowResize() {
 }
 
 // functions
+function hsvToRgb(h, s, v) {
+  var r, g, b, i, f, p, q, t;
+  if (arguments.length === 1) {
+    (s = h.s), (v = h.v), (h = h.h);
+  }
+  i = Math.floor(h * 6);
+  f = h * 6 - i;
+  p = v * (1 - s);
+  q = v * (1 - f * s);
+  t = v * (1 - (1 - f) * s);
+  switch (i % 6) {
+    case 0:
+      (r = v), (g = t), (b = p);
+      break;
+    case 1:
+      (r = q), (g = v), (b = p);
+      break;
+    case 2:
+      (r = p), (g = v), (b = t);
+      break;
+    case 3:
+      (r = p), (g = q), (b = v);
+      break;
+    case 4:
+      (r = t), (g = p), (b = v);
+      break;
+    case 5:
+      (r = v), (g = p), (b = q);
+      break;
+  }
+  return {
+    r: Math.round(r * 255),
+    g: Math.round(g * 255),
+    b: Math.round(b * 255),
+  };
+}
+
+function CHSV(hue, saturation, value) {
+  while (hue > 255) hue -= 255;
+  while (hue < 0) hue += 255;
+  while (saturation > 255) saturation -= 255;
+  while (saturation < 0) saturation += 255;
+  while (value > 255) value -= 255;
+  while (value < 0) value += 255;
+  const h = mapNumber(hue, 0, 255, 0.0, 1.0);
+  const s = mapNumber(saturation, 0, 255, 0.0, 1.0);
+  const v = mapNumber(value, 0, 255, 0.0, 1.0);
+
+  const { r, g, b } = hsvToRgb(h, s, v);
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+function CRGB(r, g, b) {
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
 function copyElementToClipboard(element) {
   var range = document.createRange();
   range.selectNode(element);
@@ -470,7 +589,15 @@ function parsePixelblaze() {
   inputCenterY.value = height / 2;
 }
 
+function handleRenderFunctionError(error) {
+  console.error({ error });
+  setRunning(false);
+  renderError.innerText = `Error: ${error.message}. Fix and click the Play button.`;
+  buttonPlayPause.className = "btn btn-sm btn-outline-danger";
+}
+
 function render(timestamp) {
+  offset += 1;
   const canvasWidth = canvasPreview.width;
   const canvasHeight = canvasPreview.height;
 
@@ -481,56 +608,27 @@ function render(timestamp) {
 
   context.clearRect(0, 0, canvasWidth, canvasHeight);
 
-  for (let led of leds || []) {
-    let hue = 0;
-    let saturation = "100%";
-    let lightness = "50%";
+  const code = `${document.getElementById("inputPreviewCode").value}`;
 
-    switch (selectPattern.value) {
-      case "rainbow":
-        hue = mapNumber(led.index - timestamp / 20, 0, leds.length - 1, 0, 360);
-        break;
-      case "clockwise rainbow":
-        hue = mapNumber(led.angle256 - timestamp / 10, 0, 256, 0, 360);
-        break;
-      case "counter-clockwise rainbow":
-        hue = mapNumber(led.angle256 + timestamp / 10, 0, 256, 0, 360);
-        break;
-      case "outward rainbow":
-        hue = mapNumber(led.radius256 - timestamp / 10, 0, 256, 0, 360);
-        break;
-      case "inward rainbow":
-        hue = mapNumber(led.radius256 + timestamp / 10, 0, 256, 0, 360);
-        break;
-      case "north rainbow":
-        hue = mapNumber(led.y256 + timestamp / 10, 0, 256, 0, 360);
-        break;
-      case "northeast rainbow":
-        hue = mapNumber(led.x256 - led.y256 - timestamp / 10, 0, 256, 0, 360);
-        break;
-      case "east rainbow":
-        hue = mapNumber(led.x256 - timestamp / 10, 0, 256, 0, 360);
-        break;
-      case "southeast rainbow":
-        hue = mapNumber(led.x256 + led.y256 - timestamp / 10, 0, 256, 0, 360);
-        break;
-      case "south rainbow":
-        hue = mapNumber(led.y256 - timestamp / 10, 0, 256, 0, 360);
-        break;
-      case "southwest rainbow":
-        hue = mapNumber(led.x256 - led.y256 + timestamp / 10, 0, 256, 0, 360);
-        break;
-      case "west rainbow":
-        hue = mapNumber(led.x256 + timestamp / 10, 0, 256, 0, 360);
-        break;
-      case "northwest rainbow":
-        hue = mapNumber(led.x256 + led.y256 + timestamp / 10, 0, 256, 0, 360);
-        break;
-      case "white":
-        hue = 0;
-        saturation = "0%";
-        lightness = "100%";
-        break;
+  let renderFunc = undefined;
+
+  renderError.innerText = "";
+
+  try {
+    renderFunc = Function("i", "angle", "radius", "x", "y", code);
+  } catch (error) {
+    handleRenderFunctionError(error);
+    return;
+  }
+
+  for (let led of leds || []) {
+    let fillStyle;
+
+    try {
+      fillStyle = renderFunc(led.index, led.angle256, led.radius256, led.x256, led.y256);
+    } catch (error) {
+      handleRenderFunctionError(error);
+      return;
     }
 
     const x = (led.x - minX) * ledWidth;
@@ -540,7 +638,7 @@ function render(timestamp) {
       context.strokeRect(x, y, ledWidth, ledHeight);
     }
 
-    context.fillStyle = `hsl(${hue}, ${saturation}, ${lightness})`;
+    context.fillStyle = fillStyle;
     context.fillRect(x, y, ledWidth, ledHeight);
 
     if (showPreviewNumbers) {
@@ -552,10 +650,19 @@ function render(timestamp) {
   if (running) window.requestAnimationFrame(render);
 }
 
+function setRunning(value) {
+  running = value;
+  document.getElementById("iconPlayPause").className = running ? "bi bi-pause-fill" : "bi bi-play-fill";
+
+  buttonPlayPause.title = running ? "Pause" : "Play";
+
+  if (running) window.requestAnimationFrame(render);
+}
+
 // initial setup function calls
 parseLayout();
 generateCode();
-
+onPatternChange();
 window.requestAnimationFrame(render);
 
 onWindowResize();
