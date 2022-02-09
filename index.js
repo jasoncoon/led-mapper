@@ -63,6 +63,9 @@ let width, height, rows, leds;
 let minX, minY, minAngle, minRadius;
 let maxX, maxY, maxAngle, maxRadius;
 
+let offset = 0;
+let coordsX, coordsY, angles, radii;
+
 let running = true;
 let showPreviewBorders = true;
 let showPreviewNumbers = true;
@@ -145,54 +148,48 @@ function onParsePixelblazeClick() {
   generateCode();
 }
 
-let offset = 0;
-
 function onPatternChange() {
   let code;
 
-  let saturation = "100%";
-  let lightness = "50%";
-
   switch (selectPattern.value) {
     case "rainbow":
-      // code = "return `hsl(${mapNumber(led.index - timestamp / 20, 0, leds.length - 1, 0, 360)}, 100%, 50%)`;";
       code = "return CHSV(i - offset, 255, 255)";
       break;
     case "clockwise rainbow":
-      code = "return CHSV(angle - offset, 255, 255);";
+      code = "return CHSV(angles[i] - offset, 255, 255);";
       break;
     case "counter-clockwise rainbow":
-      code = "return CHSV(angle + offset, 255, 255);";
+      code = "return CHSV(angles[i] + offset, 255, 255);";
       break;
     case "outward rainbow":
-      code = "return CHSV(radius - offset, 255, 255);";
+      code = "return CHSV(radii[i] - offset, 255, 255);";
       break;
     case "inward rainbow":
-      code = "return CHSV(radius + offset, 255, 255);";
+      code = "return CHSV(radii[i] + offset, 255, 255);";
       break;
     case "north rainbow":
-      code = "return CHSV(y + offset, 255, 255);";
+      code = "return CHSV(coordsY[i] + offset, 255, 255);";
       break;
     case "northeast rainbow":
-      code = "return CHSV(x - y - offset, 255, 255);";
+      code = "return CHSV(coordsX[i] - coordsY[i] - offset, 255, 255);";
       break;
     case "east rainbow":
-      code = "return CHSV(x - offset, 255, 255);";
+      code = "return CHSV(coordsX[i] - offset, 255, 255);";
       break;
     case "southeast rainbow":
-      code = "return CHSV(x + y - offset, 255, 255);";
+      code = "return CHSV(coordsX[i] + coordsY[i] - offset, 255, 255);";
       break;
     case "south rainbow":
-      code = "return CHSV(y - offset, 255, 255);";
+      code = "return CHSV(coordsY[i] - offset, 255, 255);";
       break;
     case "southwest rainbow":
-      code = "return CHSV(x - y + offset, 255, 255);";
+      code = "return CHSV(coordsX[i] - coordsY[i] + offset, 255, 255);";
       break;
     case "west rainbow":
-      code = "return CHSV(x + offset, 255, 255);";
+      code = "return CHSV(coordsX[i] + offset, 255, 255);";
       break;
     case "northwest rainbow":
-      code = "return CHSV(x + y + offset, 255, 255);";
+      code = "return CHSV(coordsX[i] + coordsY[i] + offset, 255, 255);";
       break;
     case "red":
       code = "return CRGB(255, 0, 0)";
@@ -308,12 +305,12 @@ function hsvToRgb(h, s, v) {
 }
 
 function CHSV(hue, saturation, value) {
-  while (hue > 255) hue -= 255;
-  while (hue < 0) hue += 255;
-  while (saturation > 255) saturation -= 255;
-  while (saturation < 0) saturation += 255;
-  while (value > 255) value -= 255;
-  while (value < 0) value += 255;
+  while (hue > 255) hue -= 256;
+  while (hue < 0) hue += 256;
+  while (saturation > 255) saturation -= 256;
+  while (saturation < 0) saturation += 256;
+  while (value > 255) value -= 256;
+  while (value < 0) value += 256;
   const h = mapNumber(hue, 0, 255, 0.0, 1.0);
   const s = mapNumber(saturation, 0, 255, 0.0, 1.0);
   const v = mapNumber(value, 0, 255, 0.0, 1.0);
@@ -376,10 +373,10 @@ function generateCode() {
   for (led of leds) {
     const { x, y, angle, radius } = led;
 
-    let x256 = mapNumber(x, minX, maxX, 0, 255); // .toFixed(0);
-    let y256 = mapNumber(y, minY, maxY, 0, 255); // .toFixed(0);
-    let angle256 = mapNumber(angle, 0, 360, 0, 255); // .toFixed(0);
-    let radius256 = mapNumber(radius, 0, maxRadius, 0, 255); // .toFixed(0);
+    let x256 = mapNumber(x, minX, maxX, 0, 255);
+    let y256 = mapNumber(y, minY, maxY, 0, 255);
+    let angle256 = mapNumber(angle, 0, 360, 0, 255);
+    let radius256 = mapNumber(radius, 0, maxRadius, 0, 255);
 
     led.x256 = x256;
     led.y256 = y256;
@@ -402,23 +399,15 @@ function generateCode() {
   // sort leds by index ascending
   leds.sort((a, b) => parseInt(a.index) - parseInt(b.index));
 
-  // const coordsX = `byte coordsX[NUM_LEDS] = { ${leds
-  //   .map((led) => led.x)
-  //   .join(", ")} };`;
-  // const coordsY = `byte coordsY[NUM_LEDS] = { ${leds
-  //   .map((led) => led.y)
-  //   .join(", ")} };`;
-  // const angles = `byte angles[NUM_LEDS] = { ${leds
-  //   .map((led) => led.angle.toFixed(0))
-  //   .join(", ")} };`;
-  // const radii = `byte radii[NUM_LEDS] = { ${leds
-  //   .map((led) => led.radius.toFixed(0))
-  //   .join(", ")} };`;
+  coordsX = leds.map((led) => led.x256);
+  coordsY = leds.map((led) => led.y256);
+  angles = leds.map((led) => led.angle256);
+  radii = leds.map((led) => led.radius256);
 
-  const coordsX256 = `byte coordsX[NUM_LEDS] = { ${leds.map((led) => led.x256.toFixed(0)).join(", ")} };`;
-  const coordsY256 = `byte coordsY[NUM_LEDS] = { ${leds.map((led) => led.y256.toFixed(0)).join(", ")} };`;
-  const angles256 = `byte angles[NUM_LEDS] = { ${leds.map((led) => led.angle256.toFixed(0)).join(", ")} };`;
-  const radii256 = `byte radii[NUM_LEDS] = { ${leds.map((led) => led.radius256.toFixed(0)).join(", ")} };`;
+  const coordsX256 = `byte coordsX[NUM_LEDS] = { ${coordsX.map((v) => v.toFixed(0)).join(", ")} };`;
+  const coordsY256 = `byte coordsY[NUM_LEDS] = { ${coordsY.map((v) => v.toFixed(0)).join(", ")} };`;
+  const angles256 = `byte angles[NUM_LEDS] = { ${angles.map((v) => v.toFixed(0)).join(", ")} };`;
+  const radii256 = `byte radii[NUM_LEDS] = { ${radii.map((v) => v.toFixed(0)).join(", ")} };`;
 
   codeFastLED.innerText = [
     // coordsX,
@@ -598,6 +587,7 @@ function handleRenderFunctionError(error) {
 
 function render(timestamp) {
   offset += 1;
+  if (offset > 255) offset = 0;
   const canvasWidth = canvasPreview.width;
   const canvasHeight = canvasPreview.height;
 
@@ -615,7 +605,7 @@ function render(timestamp) {
   renderError.innerText = "";
 
   try {
-    renderFunc = Function("i", "angle", "radius", "x", "y", code);
+    renderFunc = Function("i", "coordsX", "coordsY", "angles", "radii", code);
   } catch (error) {
     handleRenderFunctionError(error);
     return;
@@ -625,7 +615,7 @@ function render(timestamp) {
     let fillStyle;
 
     try {
-      fillStyle = renderFunc(led.index, led.angle256, led.radius256, led.x256, led.y256);
+      fillStyle = renderFunc(led.index, coordsX, coordsY, angles, radii);
     } catch (error) {
       handleRenderFunctionError(error);
       return;

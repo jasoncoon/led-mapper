@@ -54,7 +54,7 @@ CRGB leds[NUM_LEDS];
 #define FRAMES_PER_SECOND 120
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
-uint8_t hue = 0; // rotating "base color" used by many of the patterns
+uint8_t offset = 0; // rotating "base color" used by many of the patterns
 uint8_t speed = 30;
 
 boolean autoplay = true;
@@ -122,6 +122,7 @@ const CRGBPalette16 palettes[] = {
 const uint8_t paletteCount = ARRAY_SIZE(palettes);
 
 uint8_t currentPaletteIndex = 0;
+CRGBPalette16 currentPalette = palettes[currentPaletteIndex];
 
 boolean autoplayPalettes = true;
 uint8_t autoplayPaletteSeconds = autoplaySeconds * patternCount;
@@ -131,12 +132,9 @@ void loop()
   // Call the current pattern function once, updating the 'leds' array
   patterns[currentPatternIndex]();
 
-  // do some periodic updates
-  EVERY_N_MILLISECONDS(20)
-  {
-    hue++; // slowly cycle the "base color" through the rainbow
-  }
+  offset = beat8(speed);
 
+  // do some periodic updates
   EVERY_N_SECONDS(autoplaySeconds)
   {
     if (autoplay)
@@ -171,6 +169,7 @@ void nextPalette()
 {
   // add one to the current palette number, and wrap around at the end
   currentPaletteIndex = (currentPaletteIndex + 1) % paletteCount;
+  currentPalette = palettes[currentPaletteIndex];
 }
 
 // 2D map examples:
@@ -179,7 +178,7 @@ void clockwisePalette()
 {
   for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = ColorFromPalette(palettes[currentPaletteIndex], beat8(speed) + angles[i]);
+    leds[i] = ColorFromPalette(currentPalette, offset + angles[i]);
   }
 }
 
@@ -187,7 +186,7 @@ void counterClockwisePalette()
 {
   for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = ColorFromPalette(palettes[currentPaletteIndex], beat8(speed) - angles[i]);
+    leds[i] = ColorFromPalette(currentPalette, offset - angles[i]);
   }
 }
 
@@ -195,7 +194,7 @@ void outwardPalette()
 {
   for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = ColorFromPalette(palettes[currentPaletteIndex], beat8(speed) - radii[i]);
+    leds[i] = ColorFromPalette(currentPalette, offset - radii[i]);
   }
 }
 
@@ -203,7 +202,7 @@ void inwardPalette()
 {
   for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = ColorFromPalette(palettes[currentPaletteIndex], beat8(speed) + radii[i]);
+    leds[i] = ColorFromPalette(currentPalette, offset + radii[i]);
   }
 }
 
@@ -211,7 +210,7 @@ void northPalette()
 {
   for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = ColorFromPalette(palettes[currentPaletteIndex], beat8(speed) - coordsY[i]);
+    leds[i] = ColorFromPalette(currentPalette, offset - coordsY[i]);
   }
 }
 
@@ -219,7 +218,7 @@ void northEastPalette()
 {
   for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = ColorFromPalette(palettes[currentPaletteIndex], beat8(speed) - (coordsX[i] + coordsY[i]));
+    leds[i] = ColorFromPalette(currentPalette, offset - (coordsX[i] + coordsY[i]));
   }
 }
 
@@ -227,7 +226,7 @@ void eastPalette()
 {
   for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = ColorFromPalette(palettes[currentPaletteIndex], beat8(speed) - coordsX[i]);
+    leds[i] = ColorFromPalette(currentPalette, offset - coordsX[i]);
   }
 }
 
@@ -235,7 +234,7 @@ void southEastPalette()
 {
   for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = ColorFromPalette(palettes[currentPaletteIndex], beat8(speed) - coordsX[i] + coordsY[i]);
+    leds[i] = ColorFromPalette(currentPalette, offset - coordsX[i] + coordsY[i]);
   }
 }
 
@@ -243,7 +242,7 @@ void southPalette()
 {
   for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = ColorFromPalette(palettes[currentPaletteIndex], beat8(speed) + coordsY[i]);
+    leds[i] = ColorFromPalette(currentPalette, offset + coordsY[i]);
   }
 }
 
@@ -251,7 +250,7 @@ void southWestPalette()
 {
   for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = ColorFromPalette(palettes[currentPaletteIndex], beat8(speed) + coordsX[i] + coordsY[i]);
+    leds[i] = ColorFromPalette(currentPalette, offset + coordsX[i] + coordsY[i]);
   }
 }
 
@@ -259,7 +258,7 @@ void westPalette()
 {
   for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = ColorFromPalette(palettes[currentPaletteIndex], beat8(speed) + coordsX[i]);
+    leds[i] = ColorFromPalette(currentPalette, offset + coordsX[i]);
   }
 }
 
@@ -267,7 +266,7 @@ void northWestPalette()
 {
   for (uint16_t i = 0; i < NUM_LEDS; i++)
   {
-    leds[i] = ColorFromPalette(palettes[currentPaletteIndex], beat8(speed) + coordsX[i] - coordsY[i]);
+    leds[i] = ColorFromPalette(currentPalette, offset + coordsX[i] - coordsY[i]);
   }
 }
 
@@ -276,7 +275,7 @@ void northWestPalette()
 void rainbow()
 {
   // FastLED's built-in rainbow generator
-  fill_rainbow(leds, NUM_LEDS, hue, 7);
+  fill_rainbow(leds, NUM_LEDS, offset, 7);
 }
 
 void rainbowWithGlitter()
@@ -299,7 +298,7 @@ void confetti()
   // random colored speckles that blink in and fade smoothly
   fadeToBlackBy(leds, NUM_LEDS, 10);
   int pos = random16(NUM_LEDS);
-  leds[pos] += CHSV(hue + random8(64), 200, 255);
+  leds[pos] += CHSV(offset + random8(64), 200, 255);
 }
 
 void sinelon()
@@ -307,7 +306,7 @@ void sinelon()
   // a colored dot sweeping back and forth, with fading trails
   fadeToBlackBy(leds, NUM_LEDS, 20);
   int pos = beatsin16(13, 0, NUM_LEDS - 1);
-  leds[pos] += CHSV(hue, 255, 192);
+  leds[pos] += CHSV(offset, 255, 192);
 }
 
 void bpm()
@@ -317,8 +316,8 @@ void bpm()
   CRGBPalette16 palette = PartyColors_p;
   uint8_t beat = beatsin8(BeatsPerMinute, 64, 255);
   for (int i = 0; i < NUM_LEDS; i++)
-  { //9948
-    leds[i] = ColorFromPalette(palette, hue + (i * 2), beat - hue + (i * 10));
+  { // 9948
+    leds[i] = ColorFromPalette(palette, offset + (i * 2), beat - offset + (i * 10));
   }
 }
 

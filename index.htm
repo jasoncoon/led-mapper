@@ -532,8 +532,11 @@ i	x	y
       </div>
 
       <div class="row mt-3 gap-2">
-        <div class="col-12">Input parameters: i (LED index), x, y, angle, radius, offset (incrementing counter)</div>
-        <div class="col-12">return CHSV(hue, sat, val) or CRGB(r, g, b) all 0-255</div>
+        <div class="col-12">Input parameters: i (LED index), offset (incrementing counter), coordsX, coordsY, angles, radii (number arrays)</div>
+        <div class="col-12">
+          return CHSV(hue, sat, val) or CRGB(r, g, b) all 0-255, or any
+          <a href="https://www.w3schools.com/cssref/css_colors_legal.asp" target="_blank" rel="noopener noreferrer">CSS color</a>
+        </div>
         <div id="renderError" class="col-12 text-danger"></div>
       </div>
     </div>
