@@ -487,7 +487,7 @@ function onPreviewCodeChange() {
 
   try {
     renderFunction = Function("i", "coordsX", "coordsY", "angles", "radii", code);
-    if (!running) window.requestAnimationFrame(render);
+    window.requestAnimationFrame(render);
   } catch (error) {
     handleRenderFunctionError(error);
     return;
