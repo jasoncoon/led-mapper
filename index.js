@@ -1,6 +1,7 @@
 import { parseCoordinatesText } from "./js/coordinates.js";
 import { CHSV, CRGB, generateFastLedMapCode } from "./js/fastled.js";
 import { parseLayoutText } from "./js/layout.js";
+import { mapNumber } from "./js/math.js";
 import { palettes } from "./js/palettes.js";
 import { getPatternCode } from "./js/patterns.js";
 import { parsePixelblazeText } from "./js/pixelblaze.js";
@@ -33,47 +34,6 @@ const textAreaLayout = document.getElementById("textAreaLayout");
 const textAreaPixelblaze = document.getElementById("textAreaPixelblaze");
 
 const renderError = document.getElementById("renderError");
-
-// wire up event handlers
-buttonPlayPause.onclick = onPlayPauseClick;
-
-inputCenterX.oninput = onGenerateCode;
-inputCenterY.oninput = onGenerateCode;
-inputPreviewCode.oninput = onPreviewCodeChange;
-inputPreviewFontSize.oninput = onPreviewFontSizeChange;
-inputPreviewSpeed.oninput = onPreviewSpeedChange;
-
-selectPalette.onchange = onPaletteChange;
-selectPattern.onchange = onPatternChange;
-
-textAreaLayout.oninput = onTextLayoutChange;
-
-window.onresize = onWindowResize;
-
-document.getElementById("buttonCopyCode").onclick = onCopyCodeClick;
-document.getElementById("buttonCopyCoordinates").onclick = onCopyCoordinatesClick;
-document.getElementById("buttonCopyLayout").onclick = onCopyLayoutClick;
-document.getElementById("buttonCopyPixelblaze").onclick = onCopyPixelblazeClick;
-document.getElementById("buttonCopyPixelblazeInput").onclick = onCopyPixelblazeInputClick;
-document.getElementById("buttonNextPalette").onclick = onNextPaletteClick;
-document.getElementById("buttonNextPattern").onclick = onNextPatternClick;
-document.getElementById("buttonParseCoordinates").onclick = onParseCoordinatesClick;
-document.getElementById("buttonParseLayout").onclick = onParseLayoutClick;
-document.getElementById("buttonParsePixelblaze").onclick = onParsePixelblazeClick;
-document.getElementById("buttonPreviousPalette").onclick = onPreviousPaletteClick;
-document.getElementById("buttonPreviousPattern").onclick = onPreviousPatternClick;
-
-document.getElementById("checkboxShowPreviewBorders").onchange = onShowPreviewBordersChange;
-document.getElementById("checkboxShowPreviewNumbers").onchange = onShowPreviewNumbersChange;
-
-document.getElementById("form").onsubmit = onFormSubmit;
-
-// configure the canvas 2d context
-context.strokeStyle = "black";
-context.lineWidth = 1;
-context.textAlign = "center";
-context.textBaseline = "middle";
-context.font = "1px monospace";
 
 // define some global variables (working on eliminating these)
 let width, height, rows, leds, maxX, maxY, minX, minY, coordsX, coordsY, angles, radii;
@@ -280,6 +240,52 @@ function onWindowResize() {
 }
 
 // functions
+function addEventHandlers() {
+  buttonPlayPause.onclick = onPlayPauseClick;
+
+  inputCenterX.oninput = onGenerateCode;
+  inputCenterY.oninput = onGenerateCode;
+  inputPreviewCode.oninput = onPreviewCodeChange;
+  inputPreviewFontSize.oninput = onPreviewFontSizeChange;
+  inputPreviewSpeed.oninput = onPreviewSpeedChange;
+
+  selectPalette.onchange = onPaletteChange;
+  selectPattern.onchange = onPatternChange;
+
+  textAreaLayout.oninput = onTextLayoutChange;
+
+  window.onresize = onWindowResize;
+
+  document.getElementById("buttonCopyCode").onclick = onCopyCodeClick;
+  document.getElementById("buttonCopyCoordinates").onclick = onCopyCoordinatesClick;
+  document.getElementById("buttonCopyLayout").onclick = onCopyLayoutClick;
+  document.getElementById("buttonCopyPixelblaze").onclick = onCopyPixelblazeClick;
+  document.getElementById("buttonCopyPixelblazeInput").onclick = onCopyPixelblazeInputClick;
+  document.getElementById("buttonNextPalette").onclick = onNextPaletteClick;
+  document.getElementById("buttonNextPattern").onclick = onNextPatternClick;
+  document.getElementById("buttonParseCoordinates").onclick = onParseCoordinatesClick;
+  document.getElementById("buttonParseLayout").onclick = onParseLayoutClick;
+  document.getElementById("buttonParsePixelblaze").onclick = onParsePixelblazeClick;
+  document.getElementById("buttonPreviousPalette").onclick = onPreviousPaletteClick;
+  document.getElementById("buttonPreviousPattern").onclick = onPreviousPatternClick;
+
+  document.getElementById("checkboxFlipX").onchange = flipX;
+  document.getElementById("checkboxFlipY").onchange = flipY;
+
+  document.getElementById("checkboxShowPreviewBorders").onchange = onShowPreviewBordersChange;
+  document.getElementById("checkboxShowPreviewNumbers").onchange = onShowPreviewNumbersChange;
+
+  document.getElementById("form").onsubmit = onFormSubmit;
+}
+
+function configureCanvas2dContext() {
+  context.strokeStyle = "black";
+  context.lineWidth = 1;
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.font = "1px monospace";
+}
+
 function ColorFromPalette(palette, index) {
   while (index > 255) index -= 256;
   while (index < 0) index += 256;
@@ -305,6 +311,20 @@ function copyLayoutValueToClipboard(element) {
 
   /* Copy the text inside the text field */
   navigator.clipboard.writeText(element.value);
+}
+
+function flipX() {
+  for (const led of leds) {
+    led.x = mapNumber(led.x, maxX, minX, minX, maxX);
+  }
+  generateCode();
+}
+
+function flipY() {
+  for (const led of leds) {
+    led.y = mapNumber(led.y, maxY, minY, minY, maxY);
+  }
+  generateCode();
 }
 
 function generateCode() {
@@ -436,6 +456,8 @@ function setRunning(value) {
 }
 
 // initial setup function calls
+addEventHandlers();
+configureCanvas2dContext();
 parseLayout();
 generateCode();
 onPatternChange();
