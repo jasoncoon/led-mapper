@@ -4,8 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npx serve"
+    "start": "npx serve",
+    "lint": "eslint --ext .js --ignore-path .gitignore ."
   },
   "author": "Jason Coon",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^8.9.0"
+  }
 }
