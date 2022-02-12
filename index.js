@@ -1,5 +1,5 @@
 import { parseCoordinatesText } from "./js/coordinates.js";
-import { CHSV, CRGB } from "./js/fastled.js";
+import { CHSV, CRGB, generateFastLedMapCode } from "./js/fastled.js";
 import { parseLayoutText } from "./js/layout.js";
 import { palettes } from "./js/palettes.js";
 import { getPatternCode } from "./js/patterns.js";
@@ -78,8 +78,8 @@ context.font = "1px monospace";
 // define some global variables
 let width, height, rows, leds;
 
-let minX, minY, minAngle, minRadius;
-let maxX, maxY, maxAngle, maxRadius;
+let minX, minY;
+let maxX, maxY;
 
 let offset = 0;
 let offsetIncrement = 1.0;
@@ -313,107 +313,21 @@ function copyLayoutValueToClipboard(element) {
 }
 
 function generateCode() {
-  let minX256, minY256, minAngle256, minRadius256;
-  let maxX256, maxY256, maxAngle256, maxRadius256;
-
-  minX256 = minY256 = minAngle256 = minRadius256 = 1000000;
-  maxX256 = maxY256 = maxAngle256 = maxRadius256 = -1000000;
-
   // use the center defined by the user
   const centerX = inputCenterX.value;
   const centerY = inputCenterY.value;
 
-  // calculate the angle and radius for each LED, using the defined center
-  for (const led of leds) {
-    const { x, y } = led;
+  const results = generateFastLedMapCode({ centerX, centerY, leds, maxX, maxY, minX, minY });
 
-    const radius = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
-    const radians = Math.atan2(centerY - y, centerX - x);
+  // destructure the results into our global variables
+  ({ coordsX, coordsY, angles, radii } = results);
 
-    let angle = radians * (180 / Math.PI);
-    while (angle < 0) angle += 360;
-    while (angle > 360) angle -= 360;
+  // destructure the results into our local variables
+  const { fastLedCode, stats } = results;
 
-    if (angle < minAngle) minAngle = angle;
-    if (angle > maxAngle) maxAngle = angle;
+  codeFastLED.innerText = fastLedCode;
 
-    if (radius < minRadius) minRadius = radius;
-    if (radius > maxRadius) maxRadius = radius;
-
-    led.angle = angle;
-    led.radius = radius;
-  }
-
-  for (const led of leds) {
-    const { x, y, angle, radius } = led;
-
-    let x256 = mapNumber(x, minX, maxX, 0, 255);
-    let y256 = mapNumber(y, minY, maxY, 0, 255);
-    let angle256 = mapNumber(angle, 0, 360, 0, 255);
-    let radius256 = mapNumber(radius, 0, maxRadius, 0, 255);
-
-    led.x256 = x256;
-    led.y256 = y256;
-    led.angle256 = angle256;
-    led.radius256 = radius256;
-
-    if (x256 < minX256) minX256 = x256;
-    if (x256 > maxX256) maxX256 = x256;
-
-    if (y256 < minY256) minY256 = y256;
-    if (y256 > maxY256) maxY256 = y256;
-
-    if (angle256 < minAngle256) minAngle256 = angle256;
-    if (angle256 > maxAngle256) maxAngle256 = angle256;
-
-    if (radius256 < minRadius256) minRadius256 = radius256;
-    if (radius256 > maxRadius256) maxRadius256 = radius256;
-  }
-
-  // sort leds by index ascending
-  leds.sort((a, b) => parseInt(a.index) - parseInt(b.index));
-
-  coordsX = leds.map((led) => led.x256);
-  coordsY = leds.map((led) => led.y256);
-  angles = leds.map((led) => led.angle256);
-  radii = leds.map((led) => led.radius256);
-
-  const coordsX256 = `byte coordsX[NUM_LEDS] = { ${coordsX.map((v) => v.toFixed(0)).join(", ")} };`;
-  const coordsY256 = `byte coordsY[NUM_LEDS] = { ${coordsY.map((v) => v.toFixed(0)).join(", ")} };`;
-  const angles256 = `byte angles[NUM_LEDS] = { ${angles.map((v) => v.toFixed(0)).join(", ")} };`;
-  const radii256 = `byte radii[NUM_LEDS] = { ${radii.map((v) => v.toFixed(0)).join(", ")} };`;
-
-  codeFastLED.innerText = [
-    // coordsX,
-    // coordsY,
-    // angles,
-    // radii,
-    // "",
-    `#define NUM_LEDS ${leds.length}`,
-    "",
-    coordsX256,
-    coordsY256,
-    angles256,
-    radii256,
-  ].join("\n");
-
-  document.getElementById("codeStats").innerText = `LEDs: ${leds.length}
-minX: ${minX}
-maxX: ${maxX}
-minY: ${minY}
-maxY: ${maxY}
-minAngle: ${minAngle}
-maxAngle: ${maxAngle}
-minRadius: ${minRadius}
-maxRadius: ${maxRadius}
-minX256: ${minX256}
-maxX256: ${maxX256}
-minY256: ${minY256}
-maxY256: ${maxY256}
-minAngle256: ${minAngle256}
-maxAngle256: ${maxAngle256}
-minRadius256: ${minRadius256}
-maxRadius256: ${maxRadius256}`;
+  document.getElementById("codeStats").innerText = stats;
 
   if (!running) window.requestAnimationFrame(render);
 
@@ -425,14 +339,10 @@ function generatePixelblazeMap() {
   codePixelblaze.innerText = `[${map}]`;
 }
 
-function mapNumber(l, inMin, inMax, outMin, outMax) {
-  return ((l - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
-}
-
 function parseCoordinates() {
   const results = parseCoordinatesText(textAreaCoordinates.value);
 
-  // destructure the results into our global (yuck, sorry, working on it) variables
+  // destructure the results into our global variables
   ({ height, leds, maxX, maxY, minX, minY, rows, width } = results);
 
   document.getElementById("codeParsedCoordinates").innerText = JSON.stringify(rows);
@@ -446,7 +356,7 @@ function parseCoordinates() {
 function parseLayout() {
   const results = parseLayoutText(textAreaLayout.value);
 
-  // destructure the results into our global (yuck, sorry, working on it) variables
+  // destructure the results into our global variables
   ({ height, leds, maxX, maxY, minX, minY, rows, width } = results);
 
   document.getElementById("codeParsedLayout").innerText = JSON.stringify(rows);
@@ -460,11 +370,10 @@ function parseLayout() {
 function parsePixelblaze() {
   const results = parsePixelblazeText(textAreaPixelblaze.value);
 
-  document.getElementById("codeParsedPixelblaze").innerText = JSON.stringify(rows);
-
-  // destructure the results into our global (yuck, sorry, working on it) variables
+  // destructure the results into our global variables
   ({ height, leds, maxX, maxY, minX, minY, rows, width } = results);
 
+  document.getElementById("codeParsedPixelblaze").innerText = JSON.stringify(rows);
   inputWidth.value = width;
   inputHeight.value = height;
   inputCenterX.value = width / 2;
