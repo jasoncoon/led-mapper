@@ -75,15 +75,11 @@ context.textAlign = "center";
 context.textBaseline = "middle";
 context.font = "1px monospace";
 
-// define some global variables
-let width, height, rows, leds;
-
-let minX, minY;
-let maxX, maxY;
+// define some global variables (working on eliminating these)
+let width, height, rows, leds, maxX, maxY, minX, minY, coordsX, coordsY, angles, radii;
 
 let offset = 0;
 let offsetIncrement = 1.0;
-let coordsX, coordsY, angles, radii;
 
 let running = true;
 let showPreviewBorders = true;
@@ -198,7 +194,7 @@ function onPaletteChange() {
 }
 
 function onPatternChange() {
-  const code = getPatternCode(selectPalette.value);
+  const code = getPatternCode(selectPattern.value);
   inputPreviewCode.value = code;
   onPreviewCodeChange();
   if (!running) window.requestAnimationFrame(render);
@@ -271,7 +267,6 @@ function onTextLayoutChange() {
 }
 
 function onWindowResize() {
-  // const min = Math.min(window.innerWidth, window.innerHeight) - 48;
   const min = window.innerWidth - 48;
 
   canvasPreview.width = min;
@@ -374,6 +369,7 @@ function parsePixelblaze() {
   ({ height, leds, maxX, maxY, minX, minY, rows, width } = results);
 
   document.getElementById("codeParsedPixelblaze").innerText = JSON.stringify(rows);
+
   inputWidth.value = width;
   inputHeight.value = height;
   inputCenterX.value = width / 2;

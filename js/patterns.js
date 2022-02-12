@@ -1,6 +1,6 @@
 export function getPatternCode(patternName) {
-  switch (selectPattern.value) {
-    case "palette":
+  switch (patternName) {
+    case "physical order":
       return "return ColorFromPalette(currentPalette, i - offset);";
     case "clockwise palette":
       return "return ColorFromPalette(currentPalette, angles[i] - offset);";
