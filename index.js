@@ -44,6 +44,8 @@ let offsetIncrement = 1.0;
 let running = true;
 let showPreviewBorders = true;
 let showPreviewNumbers = true;
+let showPreviewLEDs = true;
+let darkMode = true;
 
 let renderFunction = undefined;
 
@@ -180,6 +182,14 @@ function onPreviewCodeChange() {
   }
 }
 
+function onShowPreviewDarkModeChange() {
+  darkMode = !darkMode;
+
+  document.getElementById("iconPreviewDarkMode").className = showPreviewLEDs ? "bi bi-check-square" : "bi bi-square";
+
+  if (!running) window.requestAnimationFrame(render);
+}
+
 function onPreviewFontSizeChange() {
   context.font = `${inputPreviewFontSize.value}px monospace`;
   if (!running) window.requestAnimationFrame(render);
@@ -207,6 +217,14 @@ function onShowPreviewBordersChange() {
   showPreviewBorders = !showPreviewBorders;
 
   document.getElementById("iconShowPreviewBorders").className = showPreviewBorders ? "bi bi-check-square" : "bi bi-square";
+
+  if (!running) window.requestAnimationFrame(render);
+}
+
+function onShowPreviewLEDsChange() {
+  showPreviewLEDs = !showPreviewLEDs;
+
+  document.getElementById("iconShowPreviewLEDs").className = showPreviewLEDs ? "bi bi-check-square" : "bi bi-square";
 
   if (!running) window.requestAnimationFrame(render);
 }
@@ -273,13 +291,14 @@ function addEventHandlers() {
   document.getElementById("checkboxFlipY").onchange = flipY;
 
   document.getElementById("checkboxShowPreviewBorders").onchange = onShowPreviewBordersChange;
+  document.getElementById("checkboxShowPreviewLEDs").onchange = onShowPreviewLEDsChange;
+  document.getElementById("checkboxPreviewDarkMode").onchange = onShowPreviewDarkModeChange;
   document.getElementById("checkboxShowPreviewNumbers").onchange = onShowPreviewNumbersChange;
 
   document.getElementById("form").onsubmit = onFormSubmit;
 }
 
 function configureCanvas2dContext() {
-  context.strokeStyle = "black";
   context.lineWidth = 1;
   context.textAlign = "center";
   context.textBaseline = "middle";
@@ -415,7 +434,8 @@ function render() {
   const ledWidth = canvasWidth / (max + 1);
   const ledHeight = canvasHeight / (max + 1);
 
-  context.clearRect(0, 0, canvasWidth, canvasHeight);
+  context.fillStyle = darkMode ? "black" : "white";
+  context.fillRect(0, 0, canvasWidth, canvasHeight);
 
   for (const led of leds || []) {
     let fillStyle;
@@ -431,14 +451,17 @@ function render() {
     const y = (led.y - minY) * ledHeight;
 
     if (showPreviewBorders) {
+      context.strokeStyle = darkMode ? "white" : "black";
       context.strokeRect(x, y, ledWidth, ledHeight);
     }
 
-    context.fillStyle = fillStyle;
-    context.fillRect(x, y, ledWidth, ledHeight);
+    if (showPreviewLEDs) {
+      context.fillStyle = fillStyle;
+      context.fillRect(x, y, ledWidth, ledHeight);
+    }
 
     if (showPreviewNumbers) {
-      context.fillStyle = "black";
+      context.fillStyle = !showPreviewLEDs ? fillStyle : darkMode ? "white" : "black";
       context.fillText(led.index, x + ledWidth / 2, y + ledHeight / 2);
     }
   }
