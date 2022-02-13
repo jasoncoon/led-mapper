@@ -42,12 +42,14 @@ let offset = 0;
 let offsetIncrement = 1.0;
 
 let running = true;
-let showPreviewBorders = true;
-let showPreviewNumbers = true;
+let showPreviewBorders = false;
+let showPreviewNumbers = false;
 let showPreviewLEDs = true;
 let darkMode = true;
 
 let renderFunction = undefined;
+
+let renderScale = false;
 
 const currentPalette = null;
 
@@ -246,6 +248,13 @@ function onTextLayoutChange() {
   generateCode();
 }
 
+function onToggleScale() {
+  renderScale = !renderScale;
+  const scale = renderScale ? 256 : width > height ? width : height;
+  document.getElementById("buttonToggleScale").innerText = `Scale: ${scale}`;
+  if (!running) window.requestAnimationFrame(render);
+}
+
 function onWindowResize() {
   const min = window.innerWidth - 48;
 
@@ -288,6 +297,7 @@ function addEventHandlers() {
   document.getElementById("buttonParsePixelblaze").onclick = onParsePixelblazeClick;
   document.getElementById("buttonPreviousPalette").onclick = onPreviousPaletteClick;
   document.getElementById("buttonPreviousPattern").onclick = onPreviousPatternClick;
+  document.getElementById("buttonToggleScale").onclick = onToggleScale;
 
   document.getElementById("checkboxFlipX").onchange = flipX;
   document.getElementById("checkboxFlipY").onchange = flipY;
@@ -438,13 +448,19 @@ function render() {
 
   offset += offsetIncrement;
   if (offset > 255) offset = 0;
+
   const canvasWidth = canvasPreview.width;
   const canvasHeight = canvasPreview.height;
 
-  const max = width > height ? width : height;
+  let max;
+  if (renderScale) {
+    max = 255;
+  } else {
+    max = width > height ? width : height;
+  }
 
-  const ledWidth = canvasWidth / (max + 1);
-  const ledHeight = canvasHeight / (max + 1);
+  let ledWidth = canvasWidth / (max + 1);
+  let ledHeight = canvasHeight / (max + 1);
 
   context.clearRect(0, 0, canvasWidth, canvasHeight);
   context.fillStyle = darkMode ? "black" : "white";
@@ -460,8 +476,14 @@ function render() {
       return;
     }
 
-    const x = (led.x - minX) * ledWidth;
-    const y = (led.y - minY) * ledHeight;
+    let x, y;
+    if (renderScale) {
+      x = led.x256 * ledWidth;
+      y = led.y256 * ledHeight;
+    } else {
+      x = (led.x - minX) * ledWidth;
+      y = (led.y - minY) * ledHeight;
+    }
 
     if (showPreviewBorders) {
       context.strokeStyle = darkMode ? "white" : "black";

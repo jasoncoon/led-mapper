@@ -527,7 +527,7 @@ i	x	y
                 </button>
               </div>
 
-              <div class="btn-group" role="group">
+              <div class="btn-group" role="group" title="Show/Hide LEDs">
                 <input type="checkbox" class="btn-check" id="checkboxShowPreviewLEDs" checked />
                 <label class="btn btn-outline-secondary" for="checkboxShowPreviewLEDs">
                   <i id="iconShowPreviewLEDs" class="bi bi-check-square"></i>
@@ -543,7 +543,7 @@ i	x	y
                 >
               </div>
 
-              <div class="btn-group" role="group">
+              <div class="btn-group" role="group" title="Show/Hide LED Borders">
                 <input type="checkbox" class="btn-check" id="checkboxShowPreviewBorders" checked />
                 <label class="btn btn-outline-secondary" for="checkboxShowPreviewBorders">
                   <i id="iconShowPreviewBorders" class="bi bi-check-square"></i>
@@ -552,8 +552,8 @@ i	x	y
               </div>
 
               <div class="btn-group" role="group">
-                <input type="checkbox" class="btn-check" id="checkboxShowPreviewNumbers" checked />
-                <label class="btn btn-outline-secondary" for="checkboxShowPreviewNumbers">
+                <input type="checkbox" class="btn-check" id="checkboxShowPreviewNumbers" title="Show/Hide LED Numbers" checked />
+                <label class="btn btn-outline-secondary" for="checkboxShowPreviewNumbers" title="Show/Hide LED Numbers">
                   <i id="iconShowPreviewNumbers" class="bi bi-check-square"></i>
                   Numbers</label
                 >
@@ -563,7 +563,7 @@ i	x	y
                 </div>
               </div>
 
-              <div class="btn-group" role="group">
+              <div class="btn-group" role="group" title="Pattern Speed">
                 <div class="input-group" title="Pattern Speed">
                   <div class="input-group-text">Speed</div>
                   <input id="inputPreviewSpeed" class="form-control" type="number" step="0.1" min="0.1" max="1.0" value="1" style="width: 5rem" />
@@ -593,9 +593,17 @@ i	x	y
                   <i class="bi bi-skip-forward-fill"></i>
                 </button>
               </div>
-              <canvas id="canvasSelectedPalette" width="256" height="38" style="width: 256px; height: 38px; border-radius: 4px"></canvas>
+              <canvas
+                id="canvasSelectedPalette"
+                width="256"
+                height="38"
+                style="width: 256px; height: 38px; border-radius: 4px"
+                title="Selected Palette"
+              ></canvas>
 
-              <button id="buttonReset" class="btn btn-outline-secondary">Reset</button>
+              <button id="buttonReset" class="btn btn-outline-secondary" title="Reset Pan/Zoom"><i class="bi bi-aspect-ratio"></i> Reset</button>
+
+              <button id="buttonToggleScale" class="btn btn-outline-secondary" title="Toggle LED preview scale between input and 256">Scale</button>
             </div>
 
             <div class="row mt-3 gap-2">
