@@ -187,6 +187,8 @@ function onShowPreviewDarkModeChange() {
 
   document.getElementById("iconPreviewDarkMode").className = showPreviewLEDs ? "bi bi-check-square" : "bi bi-square";
 
+  document.getElementById("panzoom-parent").style.background = darkMode ? "black" : "white";
+
   if (!running) window.requestAnimationFrame(render);
 }
 
@@ -296,6 +298,16 @@ function addEventHandlers() {
   document.getElementById("checkboxShowPreviewNumbers").onchange = onShowPreviewNumbersChange;
 
   document.getElementById("form").onsubmit = onFormSubmit;
+
+  const elem = document.getElementById("panzoom-element");
+  // eslint-disable-next-line no-undef
+  const panzoom = Panzoom(elem, {
+    canvas: true,
+    maxScale: 5,
+  });
+  elem.parentElement.addEventListener("wheel", panzoom.zoomWithWheel);
+
+  document.getElementById("buttonReset").onclick = panzoom.reset;
 }
 
 function configureCanvas2dContext() {
@@ -434,6 +446,7 @@ function render() {
   const ledWidth = canvasWidth / (max + 1);
   const ledHeight = canvasHeight / (max + 1);
 
+  context.clearRect(0, 0, canvasWidth, canvasHeight);
   context.fillStyle = darkMode ? "black" : "white";
   context.fillRect(0, 0, canvasWidth, canvasHeight);
 

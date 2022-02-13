@@ -1,6 +1,10 @@
 #canvasPreview {
-  border: 1px solid black;
   margin: 0px !important;
+  background: black;
+}
+
+#panzoom-parent {
+  background: black;
 }
 
 pre {
