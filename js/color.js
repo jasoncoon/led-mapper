@@ -1,3 +1,5 @@
+import { scale8 } from "./fastled.js";
+
 export function hsvToRgb(h, s, v) {
   var r, g, b, i, f, p, q, t;
   if (arguments.length === 1) {
@@ -33,4 +35,16 @@ export function hsvToRgb(h, s, v) {
     g: Math.round(g * 255),
     b: Math.round(b * 255),
   };
+}
+
+export function getColorAtBrightness(rgb, brightness) {
+  if (brightness === 255) return rgb;
+
+  brightness++;
+
+  let r = scale8(rgb[0], brightness) + 1;
+  let g = scale8(rgb[1], brightness) + 1;
+  let b = scale8(rgb[2], brightness) + 1;
+
+  return [r, g, b];
 }

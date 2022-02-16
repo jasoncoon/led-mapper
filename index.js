@@ -1,5 +1,6 @@
+import { getColorAtBrightness } from "./js/color.js";
 import { parseCoordinatesText } from "./js/coordinates.js";
-import { CHSV, CRGB, generateFastLedMapCode } from "./js/fastled.js";
+import { beat8, beatsin8, CHSV, cos8, CRGB, generateFastLedMapCode, sin8 } from "./js/fastled.js";
 import { parseLayoutText } from "./js/layout.js";
 import { mapNumber } from "./js/math.js";
 import { palettes } from "./js/palettes.js";
@@ -42,10 +43,8 @@ let offset = 0;
 let offsetIncrement = 1.0;
 
 let running = true;
-let showPreviewBorders = false;
 let showPreviewNumbers = false;
 let showPreviewLEDs = true;
-let darkMode = true;
 
 let renderFunction = undefined;
 
@@ -176,22 +175,29 @@ function onPreviewCodeChange() {
   renderError.innerText = "";
 
   try {
-    renderFunction = Function("i", "coordsX", "coordsY", "angles", "radii", "ColorFromPalette", "currentPalette", "offset", "CRGB", "CHSV", code);
+    renderFunction = Function(
+      "angles",
+      "beat8",
+      "beatsin8",
+      "CHSV",
+      "ColorFromPalette",
+      "coordsX",
+      "coordsY",
+      "cos8",
+      "CRGB",
+      "currentPalette",
+      "i",
+      "offset",
+      "radii",
+      "sin8",
+      "speed",
+      code
+    );
     window.requestAnimationFrame(render);
   } catch (error) {
     handleRenderFunctionError(error);
     return;
   }
-}
-
-function onShowPreviewDarkModeChange() {
-  darkMode = !darkMode;
-
-  document.getElementById("iconPreviewDarkMode").className = showPreviewLEDs ? "bi bi-check-square" : "bi bi-square";
-
-  document.getElementById("panzoom-parent").style.background = darkMode ? "black" : "white";
-
-  if (!running) window.requestAnimationFrame(render);
 }
 
 function onPreviewFontSizeChange() {
@@ -215,14 +221,6 @@ function onPreviousPatternClick() {
 
   selectPattern.selectedIndex = newIndex > -1 ? newIndex : selectPattern.options.length - 1;
   onPatternChange();
-}
-
-function onShowPreviewBordersChange() {
-  showPreviewBorders = !showPreviewBorders;
-
-  document.getElementById("iconShowPreviewBorders").className = showPreviewBorders ? "bi bi-check-square" : "bi bi-square";
-
-  if (!running) window.requestAnimationFrame(render);
 }
 
 function onShowPreviewLEDsChange() {
@@ -302,9 +300,7 @@ function addEventHandlers() {
   document.getElementById("checkboxFlipX").onchange = flipX;
   document.getElementById("checkboxFlipY").onchange = flipY;
 
-  document.getElementById("checkboxShowPreviewBorders").onchange = onShowPreviewBordersChange;
   document.getElementById("checkboxShowPreviewLEDs").onchange = onShowPreviewLEDsChange;
-  document.getElementById("checkboxPreviewDarkMode").onchange = onShowPreviewDarkModeChange;
   document.getElementById("checkboxShowPreviewNumbers").onchange = onShowPreviewNumbersChange;
 
   document.getElementById("form").onsubmit = onFormSubmit;
@@ -327,13 +323,20 @@ function configureCanvas2dContext() {
   context.font = "1px monospace";
 }
 
-function ColorFromPalette(palette, index) {
+function ColorFromPalette(palette, index, brightness = 255) {
   while (index > 255) index -= 256;
   while (index < 0) index += 256;
   const imageData = contextSelectedPalette.getImageData(index, 0, canvasSelectedPalette.width, canvasSelectedPalette.height);
   const data = imageData.data;
-  const color = `rgb(${data[0]}, ${data[1]}, ${data[2]})`;
-  return color;
+
+  while (brightness > 255) brightness -= 256;
+  while (brightness < 0) brightness += 256;
+
+  const rgb = getColorAtBrightness(data, brightness);
+
+  // console.log({ rgb });
+
+  return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
 }
 
 function copyElementToClipboard(element) {
@@ -462,15 +465,22 @@ function render() {
   let ledWidth = canvasWidth / (max + 1);
   let ledHeight = canvasHeight / (max + 1);
 
+  context.globalCompositeOperation = "source-over";
   context.clearRect(0, 0, canvasWidth, canvasHeight);
-  context.fillStyle = darkMode ? "black" : "white";
+  context.fillStyle = "black";
   context.fillRect(0, 0, canvasWidth, canvasHeight);
+  context.globalCompositeOperation = "lighter";
+
+  const center = ledWidth / 2;
 
   for (const led of leds || []) {
     let fillStyle;
 
+    const i = led.index;
+    const speed = offsetIncrement;
+
     try {
-      fillStyle = renderFunction(led.index, coordsX, coordsY, angles, radii, ColorFromPalette, currentPalette, offset, CRGB, CHSV);
+      fillStyle = renderFunction(angles, beat8, beatsin8, CHSV, ColorFromPalette, coordsX, coordsY, cos8, CRGB, currentPalette, i, offset, radii, sin8, speed);
     } catch (error) {
       handleRenderFunctionError(error);
       return;
@@ -485,18 +495,15 @@ function render() {
       y = (led.y - minY) * ledHeight;
     }
 
-    if (showPreviewBorders) {
-      context.strokeStyle = darkMode ? "white" : "black";
-      context.strokeRect(x, y, ledWidth, ledHeight);
-    }
-
     if (showPreviewLEDs) {
       context.fillStyle = fillStyle;
-      context.fillRect(x, y, ledWidth, ledHeight);
+      context.beginPath();
+      context.ellipse(x + center, y + center, center, center, 0, 0, Math.PI * 2, false);
+      context.fill();
     }
 
     if (showPreviewNumbers) {
-      context.fillStyle = !showPreviewLEDs ? fillStyle : darkMode ? "white" : "black";
+      context.fillStyle = !showPreviewLEDs ? fillStyle : "white";
       context.fillText(led.index, x + ledWidth / 2, y + ledHeight / 2);
     }
   }

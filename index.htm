@@ -494,7 +494,8 @@ i	x	y
               <div class="input-group">
                 <div class="input-group-text">Pattern</div>
                 <select id="selectPattern" class="form-control w-auto">
-                  <option selected>physical order</option>
+                  <option selected>beatsin8</option>
+                  <option>physical order</option>
                   <option>clockwise palette</option>
                   <option>counter-clockwise palette</option>
                   <option>outward palette</option>
@@ -536,25 +537,9 @@ i	x	y
               </div>
 
               <div class="btn-group" role="group">
-                <input type="checkbox" class="btn-check" id="checkboxPreviewDarkMode" checked />
-                <label class="btn btn-outline-secondary" for="checkboxPreviewDarkMode">
-                  <i id="iconPreviewDarkMode" class="bi bi-check-square"></i>
-                  Dark Mode</label
-                >
-              </div>
-
-              <div class="btn-group" role="group" title="Show/Hide LED Borders">
-                <input type="checkbox" class="btn-check" id="checkboxShowPreviewBorders" checked />
-                <label class="btn btn-outline-secondary" for="checkboxShowPreviewBorders">
-                  <i id="iconShowPreviewBorders" class="bi bi-check-square"></i>
-                  Borders</label
-                >
-              </div>
-
-              <div class="btn-group" role="group">
                 <input type="checkbox" class="btn-check" id="checkboxShowPreviewNumbers" title="Show/Hide LED Numbers" checked />
                 <label class="btn btn-outline-secondary" for="checkboxShowPreviewNumbers" title="Show/Hide LED Numbers">
-                  <i id="iconShowPreviewNumbers" class="bi bi-check-square"></i>
+                  <i id="iconShowPreviewNumbers" class="bi bi-square"></i>
                   Numbers</label
                 >
                 <div class="input-group" title="LED Numbers Font Size">
@@ -566,7 +551,7 @@ i	x	y
               <div class="btn-group" role="group" title="Pattern Speed">
                 <div class="input-group" title="Pattern Speed">
                   <div class="input-group-text">Speed</div>
-                  <input id="inputPreviewSpeed" class="form-control" type="number" step="0.1" min="0.1" max="1.0" value="1" style="width: 5rem" />
+                  <input id="inputPreviewSpeed" class="form-control" type="number" step="0.1" min="0.1" max="1.0" value="1" style="width: 4rem" />
                 </div>
               </div>
             </div>

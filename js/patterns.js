@@ -1,5 +1,7 @@
 export function getPatternCode(patternName) {
   switch (patternName) {
+    case "beatsin8":
+      return "return ColorFromPalette(currentPalette, coordsX[i], beatsin8(speed*40, 0, 255, 0, coordsX[i] + coordsY[i]));";
     case "physical order":
       return "return ColorFromPalette(currentPalette, i - offset);";
     case "clockwise palette":

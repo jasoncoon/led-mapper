@@ -1,6 +1,58 @@
 import { hsvToRgb } from "./color.js";
 import { mapNumber } from "./math.js";
 
+export function scale8(i, scale) {
+  return (i * (1 + scale)) >> 8;
+}
+
+export function beat16(beats_per_minute, timebase = 0) {
+  if (beats_per_minute < 256) beats_per_minute <<= 8;
+  let result = ((Date.now() - timebase) * beats_per_minute * 280) >> 16;
+  result = mapNumber(result, -32767.5, 32767.5, 0, 65535);
+  return result;
+}
+
+export function beat8(beats_per_minute, timebase = 0) {
+  const result = beat16(beats_per_minute, timebase) >> 8;
+  // console.log(result);
+  return result;
+}
+
+export function beatsin8(beats_per_minute, lowest = 0, highest = 255, timebase = 0, phase_offset = 0) {
+  const beat = beat8(beats_per_minute, timebase);
+  const beatsin = sin8(beat + phase_offset);
+  const rangewidth = highest - lowest;
+  const scaledbeat = scale8(beatsin, rangewidth);
+  const result = lowest + scaledbeat;
+  // console.log(result);
+  return result;
+}
+
+/**
+ * @param {byte} theta - input angle from 0-255
+ * @returns {byte} sin of theta, value between 0 and 255
+ */
+export function sin8(theta) {
+  while (theta > 255) theta -= 256;
+  while (theta < 0) theta += 256;
+  // console.log(theta);
+  const t = mapNumber(theta, 0, 255, -Math.PI, Math.PI);
+  // console.log(t);
+  const sin = Math.sin(t);
+  // console.log(sin);
+  const result = ((sin + 1) / 2) * 255;
+  // console.log(result);
+  return result;
+}
+
+/**
+ * @param {byte} theta - input angle from 0-255
+ * @returns {byte} sin of theta, value between 0 and 255
+ */
+export function cos8(theta) {
+  return sin8(theta + 64);
+}
+
 export function CHSV(hue, saturation, value) {
   while (hue > 255) hue -= 256;
   while (hue < 0) hue += 256;
