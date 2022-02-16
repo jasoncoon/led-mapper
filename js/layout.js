@@ -36,6 +36,7 @@ export function parseLayoutText(text) {
         index,
         x,
         y,
+        z: 0,
       });
     }
   }

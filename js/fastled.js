@@ -73,7 +73,7 @@ export function CRGB(r, g, b) {
 }
 
 export function generateFastLedMapCode(args) {
-  const { centerX, centerY, leds, maxX, maxY, minX, minY } = args;
+  const { centerX, centerY, leds, maxX, maxY, maxZ, minX, minY, minZ } = args;
 
   let minX256, minY256, minAngle, minAngle256, minRadius, minRadius256;
   let maxX256, maxY256, maxAngle, maxAngle256, maxRadius, maxRadius256;
@@ -162,6 +162,8 @@ minX: ${minX}
 maxX: ${maxX}
 minY: ${minY}
 maxY: ${maxY}
+minZ: ${minZ}
+maxZ: ${maxZ}
 minAngle: ${minAngle}
 maxAngle: ${maxAngle}
 minRadius: ${minRadius}

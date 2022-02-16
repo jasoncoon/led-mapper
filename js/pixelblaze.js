@@ -4,16 +4,17 @@ export function parsePixelblazeText(text) {
 
   const leds = [];
 
-  let minX, minY, maxX, maxY, width, height;
+  let minX, minY, maxX, maxY, minZ, maxZ, width, height, depth;
 
-  minX = minY = 1000000;
-  maxX = maxY = -1000000;
+  minX = minY = minZ = 1000000;
+  maxX = maxY = maxZ = -1000000;
 
   let index = 0;
 
   for (const row of rows) {
     const x = row[0];
     const y = row[1];
+    const z = row.length > 2 ? row[2] : 0;
 
     if (x < minX) minX = x;
     if (x > maxX) maxX = x;
@@ -21,23 +22,31 @@ export function parsePixelblazeText(text) {
     if (y < minY) minY = y;
     if (y > maxY) maxY = y;
 
+    if (z < minZ) minZ = z;
+    if (z > maxZ) maxZ = z;
+
     leds.push({
       index: index++,
       x,
       y,
+      z,
     });
   }
 
   width = maxX - minX;
   height = maxY - minY;
+  depth = maxZ - minZ;
 
   return {
+    depth,
     height,
     leds,
     maxX,
     maxY,
+    maxZ,
     minX,
     minY,
+    minZ,
     rows,
     width,
   };

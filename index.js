@@ -3,6 +3,7 @@ import { parseCoordinatesText } from "./js/coordinates.js";
 import { beat8, beatsin8, CHSV, cos8, CRGB, generateFastLedMapCode, sin8 } from "./js/fastled.js";
 import { parseLayoutText } from "./js/layout.js";
 import { mapNumber } from "./js/math.js";
+import { MDN } from "./js/mdn.js";
 import { palettes } from "./js/palettes.js";
 import { getPatternCode } from "./js/patterns.js";
 import { parsePixelblazeText } from "./js/pixelblaze.js";
@@ -37,7 +38,7 @@ const textAreaPixelblaze = document.getElementById("textAreaPixelblaze");
 const renderError = document.getElementById("renderError");
 
 // define some global variables (working on eliminating these)
-let width, height, rows, leds, maxX, maxY, minX, minY, coordsX, coordsY, angles, radii;
+let depth, width, height, rows, leds, maxX, maxY, maxZ, minX, minY, minZ, coordsX, coordsY, angles, radii;
 
 let offset = 0;
 let offsetIncrement = 1.0;
@@ -51,6 +52,21 @@ let renderFunction = undefined;
 let renderScale = false;
 
 const currentPalette = null;
+
+let pixelMap = [];
+let pixelMapDimensions;
+
+let focalLength = 384;
+
+let angleX = (Math.PI / 4.0).toFixed(2);
+let angleZ = 0.0;
+let scale = 0.4;
+
+let dragOffset = { x: 0, y: 0 };
+let isMouseDown = false;
+
+// const render = render2d;
+const render = render3d;
 
 // event handlers
 function onCopyCodeClick() {
@@ -254,12 +270,12 @@ function onToggleScale() {
 }
 
 function onWindowResize() {
-  const min = window.innerWidth - 48;
+  // const min = window.innerWidth - 48;
 
-  canvasPreview.width = min;
-  canvasPreview.height = min;
-  canvasPreview.style.width = `${min}px`;
-  canvasPreview.style.height = `${min}px`;
+  // canvasPreview.width = min;
+  // canvasPreview.height = min;
+  // canvasPreview.style.width = `${min}px`;
+  // canvasPreview.style.height = `${min}px`;
   context.textAlign = "center";
   context.textBaseline = "middle";
 
@@ -305,15 +321,31 @@ function addEventHandlers() {
 
   document.getElementById("form").onsubmit = onFormSubmit;
 
-  const elem = document.getElementById("panzoom-element");
-  // eslint-disable-next-line no-undef
-  const panzoom = Panzoom(elem, {
-    canvas: true,
-    maxScale: 5,
-  });
-  elem.parentElement.addEventListener("wheel", panzoom.zoomWithWheel);
+  // const elem = document.getElementById("panzoom-element");
+  // // eslint-disable-next-line no-undef
+  // const panzoom = Panzoom(elem, {
+  //   canvas: true,
+  //   maxScale: 5,
+  // });
+  // elem.parentElement.addEventListener("wheel", panzoom.zoomWithWheel);
+  // document.getElementById("buttonReset").onclick = panzoom.reset;
 
-  document.getElementById("buttonReset").onclick = panzoom.reset;
+  canvasPreview.onmousedown = (e) => {
+    dragOffset.x = e.x - angleZ * 100;
+    dragOffset.y = e.y - angleX * 100;
+    isMouseDown = true;
+  };
+
+  canvasPreview.onmouseup = () => {
+    isMouseDown = false;
+  };
+
+  canvasPreview.onmousemove = (e) => {
+    if (!isMouseDown) return;
+
+    angleZ = (e.x - dragOffset.x) / -100.0;
+    angleX = (e.y - dragOffset.y) / 100.0;
+  };
 }
 
 function configureCanvas2dContext() {
@@ -376,7 +408,7 @@ function generateCode() {
   const centerX = inputCenterX.value;
   const centerY = inputCenterY.value;
 
-  const results = generateFastLedMapCode({ centerX, centerY, leds, maxX, maxY, minX, minY });
+  const results = generateFastLedMapCode({ centerX, centerY, leds, maxX, maxY, maxZ, minX, minY, minZ });
 
   // destructure the results into our global variables
   ({ coordsX, coordsY, angles, radii } = results);
@@ -391,11 +423,51 @@ function generateCode() {
   if (!running) window.requestAnimationFrame(render);
 
   generatePixelblazeMap();
+
+  generatePixelMap();
 }
 
 function generatePixelblazeMap() {
-  const map = leds.map((led) => `[${led.x},${led.y}]`).join(",");
+  const map = leds.map((led) => `[${led.x},${led.y},${led.z}]`).join(",");
   codePixelblaze.innerText = `[${map}]`;
+}
+
+function generatePixelMap() {
+  var t = [];
+  var a = [];
+  leds.forEach(function (led) {
+    const e = [led.x, led.y, led.z];
+    e.forEach(function (e, n) {
+      a[n] = void 0 === a[n] ? e : a[n];
+      t[n] = void 0 === t[n] ? e : t[n];
+      a[n] = Math.max(a[n], e);
+      t[n] = Math.min(t[n], e);
+    });
+  });
+
+  pixelMapDimensions = t.length;
+
+  for (
+    var n =
+        (pixelMap = leds.map(function (led) {
+          const e = [led.x, led.y, led.z];
+          return e.map(function (e, n) {
+            var r = a[n] - t[n];
+            return (r = 0 === r ? 1 : r), Math.round((255 * (e - t[n])) / r);
+          });
+        })).length * pixelMapDimensions,
+      r = new Uint8Array(n),
+      o = 0,
+      i = 0;
+    i < pixelMap.length;
+    i++
+  ) {
+    for (var s = 0; s < pixelMapDimensions; s++) {
+      r[o++] = pixelMap[i][s] || 0;
+    }
+  }
+  var l = new Uint32Array(3);
+  (l[0] = 1), (l[1] = pixelMapDimensions), (l[2] = n);
 }
 
 function parseCoordinates() {
@@ -430,7 +502,7 @@ function parsePixelblaze() {
   const results = parsePixelblazeText(textAreaPixelblaze.value);
 
   // destructure the results into our global variables
-  ({ height, leds, maxX, maxY, minX, minY, rows, width } = results);
+  ({ depth, height, leds, maxX, maxY, maxZ, minX, minY, minZ, rows, width } = results);
 
   document.getElementById("codeParsedPixelblaze").innerText = JSON.stringify(rows);
 
@@ -446,7 +518,7 @@ function handleRenderFunctionError(error) {
   renderError.innerText = `Error: ${error.message}.`;
 }
 
-function render() {
+function render2d() {
   if (renderFunction === undefined) return;
 
   offset += offsetIncrement;
@@ -511,6 +583,101 @@ function render() {
   if (running) window.requestAnimationFrame(render);
 }
 
+function render3d() {
+  offset += offsetIncrement;
+  if (offset > 255) offset = 0;
+
+  context.globalCompositeOperation = "source-over";
+  context.fillStyle = "rgb(0,0,0)";
+  context.fillRect(0, 0, 266, 266);
+  context.globalCompositeOperation = "lighter";
+
+  // var t = new Date().getTime();
+
+  var e = 10;
+  // var e = ((256 / Math.sqrt(pixelMap.length)) * pixelMapDimensions) / 2;
+  var a = MDN.multiplyArrayOfMatrices([
+    MDN.translateMatrix(128, 128, 128),
+    MDN.rotateXMatrix(angleX),
+    // MDN.rotateYMatrix(angleY),
+    MDN.rotateZMatrix(angleZ),
+    MDN.scaleMatrix(scale, scale, scale),
+    MDN.translateMatrix(-128, -128, -128),
+  ]);
+
+  pixelMap.forEach((pixel, index) => {
+    var x = pixel[0];
+    var y = pixel[1];
+    var z = pixel[2];
+    var c = MDN.multiplyPoint(a, [x, y, z, 1]);
+    x = c[0];
+    y = c[1];
+    z = c[2];
+    var d = focalLength / (y + focalLength);
+    x = (x - 128) * d + 128;
+    z = (z - 128) * d + 128;
+
+    let fillStyle;
+
+    const i = index;
+    const speed = offsetIncrement;
+
+    if (renderFunction) {
+      try {
+        fillStyle = renderFunction(
+          angles,
+          beat8,
+          beatsin8,
+          CHSV,
+          ColorFromPalette,
+          coordsX,
+          coordsY,
+          cos8,
+          CRGB,
+          currentPalette,
+          i,
+          offset,
+          radii,
+          sin8,
+          speed
+        );
+      } catch (error) {
+        handleRenderFunctionError(error);
+        return;
+      }
+    }
+
+    if (fillStyle) {
+      // console.log(fillStyle);
+      if (fillStyle.startsWith("rgb(") && fillStyle.endsWith(")")) {
+        let gradient = context.createRadialGradient(x, z, d, x, z, (e / 2) * d);
+
+        fillStyle = fillStyle.replace("rgb(", "rgba(").replace(")", "");
+
+        gradient.addColorStop(0, fillStyle + ", 1)");
+        gradient.addColorStop(0.25, fillStyle + ", .2)");
+        gradient.addColorStop(1, "rgba(0,0,0,0)");
+
+        fillStyle = gradient;
+      } else if (fillStyle.startsWith("hsl(") && fillStyle.endsWith(")")) {
+        let gradient = context.createRadialGradient(x, z, d, x, z, (e / 2) * d);
+
+        fillStyle = fillStyle.replace("hsl(", "hsla(").replace(")", "");
+
+        gradient.addColorStop(0, fillStyle + ", 1)");
+        gradient.addColorStop(0.25, fillStyle + ", .2)");
+        gradient.addColorStop(1, "rgba(0,0,0,0)");
+
+        fillStyle = gradient;
+      }
+      context.fillStyle = fillStyle;
+      context.fillRect(x - e / 2, z - e / 2, e, e);
+    }
+  });
+
+  requestAnimationFrame(render3d);
+}
+
 function setRunning(value) {
   running = value;
   document.getElementById("iconPlayPause").className = running ? "bi bi-pause-fill" : "bi bi-play-fill";
@@ -527,6 +694,18 @@ parseLayout();
 generateCode();
 onPatternChange();
 onPaletteChange();
+// window.requestAnimationFrame(render);
 window.requestAnimationFrame(render);
 
 onWindowResize();
+
+function spiralMap(pixelCount) {
+  var map = [];
+  for (let i = 0; i < pixelCount; i++) {
+    let c = ((-i * 10) / pixelCount) * Math.PI * 2;
+    map.push([Math.cos(c), Math.sin(c), 1 - i / pixelCount]);
+  }
+  return map;
+}
+
+console.log(JSON.stringify(spiralMap(64)));
