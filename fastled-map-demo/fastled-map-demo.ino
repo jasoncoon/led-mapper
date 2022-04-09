@@ -32,7 +32,7 @@ FASTLED_USING_NAMESPACE
 #endif
 
 // change these to match your data pin, LED type, and color order
-#define DATA_PIN D5
+#define DATA_PIN A10
 #define LED_TYPE WS2812B
 #define COLOR_ORDER GRB
 
