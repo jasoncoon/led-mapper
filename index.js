@@ -79,7 +79,7 @@ function onCopyCodeClick() {
 }
 
 function onCopyCoordinatesClick() {
-  copyLayoutValueToClipboard(textAreaCoordinates);
+  copyElementValueToClipboard(textAreaCoordinates);
   const div = document.getElementById("divCopyCoordinates");
   div.innerText = "Copied to clipboard";
   div.className = "visible input-group-text";
@@ -88,7 +88,7 @@ function onCopyCoordinatesClick() {
 }
 
 function onCopyLayoutClick() {
-  copyLayoutValueToClipboard(textAreaLayout);
+  copyElementValueToClipboard(textAreaLayout);
   const div = document.getElementById("divCopyLayout");
   div.innerText = "Copied to clipboard";
   div.className = "visible input-group-text";
@@ -122,6 +122,18 @@ function onFormSubmit(event) {
 
 function onGenerateCode() {
   generateCode();
+}
+
+function onLinkCoordinates() {
+  copyLinkToClipboard(textAreaCoordinates, 'c', 'Coordinates');
+}
+
+function onLinkLayout() {
+  copyLinkToClipboard(textAreaLayout, 'l', 'Layout');
+}
+
+function onLinkPixelblaze() {
+  copyLinkToClipboard(textAreaPixelblaze, 'p', 'Pixelblaze');
 }
 
 function onNextPaletteClick() {
@@ -304,6 +316,9 @@ function addEventHandlers() {
   document.getElementById("buttonCopyLayout").onclick = onCopyLayoutClick;
   document.getElementById("buttonCopyPixelblaze").onclick = onCopyPixelblazeClick;
   document.getElementById("buttonCopyPixelblazeInput").onclick = onCopyPixelblazeInputClick;
+  document.getElementById("buttonLinkCoordinates").onclick = onLinkCoordinates;
+  document.getElementById("buttonLinkLayout").onclick = onLinkLayout;
+  document.getElementById("buttonLinkPixelblaze").onclick = onLinkPixelblaze;
   document.getElementById("buttonNextPalette").onclick = onNextPaletteClick;
   document.getElementById("buttonNextPattern").onclick = onNextPatternClick;
   document.getElementById("buttonParseCoordinates").onclick = onParseCoordinatesClick;
@@ -379,7 +394,7 @@ function copyElementToClipboard(element) {
   document.execCommand("copy");
 }
 
-function copyLayoutValueToClipboard(element) {
+function copyElementValueToClipboard(element) {
   element.select();
 
   element.select();
@@ -387,6 +402,21 @@ function copyLayoutValueToClipboard(element) {
 
   /* Copy the text inside the text field */
   navigator.clipboard.writeText(element.value);
+}
+
+function copyLinkToClipboard(element, queryParam, name) {
+  element.select();
+  element.select();
+  element.setSelectionRange(0, 99999); /* For mobile devices */
+  const text = element.value;
+  const data = btoa(text);
+  console.log({location: location.toString(), search: location.search, data});
+  navigator.clipboard.writeText(`${location.toString().replace(location.search, "")}?${queryParam}=${data}`);
+
+  const div = document.getElementById(`divCopy${name}Input`);
+  div.innerText = `${name} link copied to clipboard`;
+  div.className = "visible input-group-text";
+  setTimeout(() => (div.className = "invisible input-group-text"), 1000);
 }
 
 function flipX() {
@@ -432,46 +462,9 @@ function generatePixelblazeMap() {
   codePixelblaze.innerText = `[${map}]`;
 }
 
-function generatePixelMap() {
-  var t = [];
-  var a = [];
-  leds.forEach(function (led) {
-    const e = [led.x, led.y, led.z];
-    e.forEach(function (e, n) {
-      a[n] = void 0 === a[n] ? e : a[n];
-      t[n] = void 0 === t[n] ? e : t[n];
-      a[n] = Math.max(a[n], e);
-      t[n] = Math.min(t[n], e);
-    });
-  });
-
-  pixelMapDimensions = t.length;
-
-  for (
-    var n =
-        (pixelMap = leds.map(function (led) {
-          const e = [led.x, led.y, led.z];
-          return e.map(function (e, n) {
-            var r = a[n] - t[n];
-            return (r = 0 === r ? 1 : r), Math.round((255 * (e - t[n])) / r);
-          });
-        })).length * pixelMapDimensions,
-      r = new Uint8Array(n),
-      o = 0,
-      i = 0;
-    i < pixelMap.length;
-    i++
-  ) {
-    for (var s = 0; s < pixelMapDimensions; s++) {
-      r[o++] = pixelMap[i][s] || 0;
-    }
-  }
-  var l = new Uint32Array(3);
-  (l[0] = 1), (l[1] = pixelMapDimensions), (l[2] = n);
-}
-
-function parseCoordinates() {
-  const results = parseCoordinatesText(textAreaCoordinates.value);
+function parseCoordinates(value) {
+  if (!value) value = textAreaCoordinates.value
+  const results = parseCoordinatesText(value);
 
   // destructure the results into our global variables
   ({ height, leds, maxX, maxY, minX, minY, rows, width } = results);
@@ -484,8 +477,9 @@ function parseCoordinates() {
   inputCenterY.value = height / 2;
 }
 
-function parseLayout() {
-  const results = parseLayoutText(textAreaLayout.value);
+function parseLayout(value) {
+  if (!value) value = textAreaLayout.value;
+  const results = parseLayoutText(value);
 
   // destructure the results into our global variables
   ({ height, leds, maxX, maxY, minX, minY, rows, width } = results);
@@ -498,8 +492,10 @@ function parseLayout() {
   inputCenterY.value = height / 2;
 }
 
-function parsePixelblaze() {
-  const results = parsePixelblazeText(textAreaPixelblaze.value);
+function parsePixelblaze(value) {
+  if (!value) value = textAreaPixelblaze.value;
+
+  const results = parsePixelblazeText(value);
 
   // destructure the results into our global variables
   ({ depth, height, leds, maxX, maxY, maxZ, minX, minY, minZ, rows, width } = results);
@@ -510,6 +506,57 @@ function parsePixelblaze() {
   inputHeight.value = height;
   inputCenterX.value = width / 2;
   inputCenterY.value = height / 2;
+}
+
+function parseQueryString() {
+  if (!location.search) return;
+  const params = new URLSearchParams(location.search);
+  const coordinates = params.get('c');
+  const layout = params.get('l');
+  const pixelblaze = params.get('p');
+
+  let data;
+  let tabName;
+  if (coordinates) {
+    data = atob(coordinates);
+    textAreaCoordinates.value = data;
+    tabName = 'coordinates';
+    parseCoordinates();
+  } else if (layout) {
+    data = atob(layout);
+    textAreaLayout.value = data;
+    tabName = 'layout';
+    parseLayout();
+  } else if (pixelblaze) { 
+    data = atob(pixelblaze);
+    console.log({data});
+    textAreaPixelblaze.value = data;
+    tabName = 'pixelblaze';
+    parsePixelblaze();
+  }
+
+  console.log({search: location.search, data, tabName});
+
+  const tabNames = ['coordinates', 'layout', 'pixelblaze'];
+
+  if (tabName) {
+    for (const t of tabNames) {
+      let e = document.getElementById(`${t}-input-tab`);
+      e.setAttribute('aria-selected', 'false');
+      e.setAttribute('class', 'nav-link');
+
+      e = document.getElementById(`${t}-input`);
+      e.setAttribute('class', 'tab-pane fade');
+    }
+
+    let e = document.getElementById(`${tabName}-input-tab`);
+    e.setAttribute('aria-selected', 'true');
+    e.setAttribute('class', 'nav-link active');
+
+    e = document.getElementById(`${tabName}-input`);
+    e.setAttribute('class', 'tab-pane fade show active');
+    return true;
+  }
 }
 
 function handleRenderFunctionError(error) {
@@ -690,7 +737,9 @@ function setRunning(value) {
 // initial setup function calls
 addEventHandlers();
 configureCanvas2dContext();
-parseLayout();
+if (!parseQueryString()) {
+  parseLayout();
+}
 generateCode();
 onPatternChange();
 onPaletteChange();

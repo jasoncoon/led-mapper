@@ -33,9 +33,8 @@ export function parsePixelblazeText(text) {
     });
   }
 
-  width = maxX - minX;
-  height = maxY - minY;
-  depth = maxZ - minZ;
+  width = maxX - minX + 1;
+  height = maxY - minY + 1;
 
   return {
     depth,
