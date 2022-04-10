@@ -40,8 +40,8 @@ export function parseLayoutText(text) {
     }
   }
 
-  width = maxX - minX;
-  height = maxY - minY;
+  width = maxX - minX + 1;
+  height = maxY - minY + 1;
 
   return {
     height,
