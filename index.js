@@ -377,7 +377,8 @@ function copyLinkToClipboard(element, queryParam, name) {
   element.select();
   element.setSelectionRange(0, 99999); /* For mobile devices */
   const text = element.value;
-  const data = btoa(text);
+  const data = LZString.compressToEncodedURIComponent(text);
+  // const data = btoa(text);
   console.log({location: location.toString(), search: location.search, data});
   navigator.clipboard.writeText(`${location.toString().replace(location.search, "")}?${queryParam}=${data}`);
 
@@ -484,17 +485,21 @@ function parseQueryString() {
   let data;
   let tabName;
   if (coordinates) {
-    data = atob(coordinates);
+    // data = atob(coordinates);
+    data = LZString.decompressFromEncodedURIComponent(coordinates);
     textAreaCoordinates.value = data;
     tabName = 'coordinates';
     parseCoordinates();
   } else if (layout) {
-    data = atob(layout);
+
+    // data = atob(layout);
+    data = LZString.decompressFromEncodedURIComponent(layout);
     textAreaLayout.value = data;
     tabName = 'layout';
     parseLayout();
   } else if (pixelblaze) { 
-    data = atob(pixelblaze);
+    // data = atob(pixelblaze);
+    data = LZString.decompressFromEncodedURIComponent(pixelblaze);
     console.log({data});
     textAreaPixelblaze.value = data;
     tabName = 'pixelblaze';
