@@ -448,6 +448,10 @@ function parseLayout(value) {
   if (!value) value = textAreaLayout.value;
   const results = parseLayoutText(value);
 
+  if (results.minIndex !== 0) {
+    alert(`Layout should start at 0 instead of ${results.minIndex}`);
+  }
+
   // destructure the results into our global variables
   ({ height, leds, maxX, maxY, minX, minY, rows, width } = results);
 

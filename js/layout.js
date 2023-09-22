@@ -12,9 +12,9 @@ export function parseLayoutText(text) {
 
   const leds = [];
 
-  let minX, minY, maxX, maxY, width, height;
+  let minX, minY, maxX, maxY, width, height, minIndex;
 
-  minX = minY = 1000000;
+  minX = minY = minIndex = 1000000;
   maxX = maxY = -1000000;
 
   for (let y = 0; y < rows.length; y++) {
@@ -31,6 +31,8 @@ export function parseLayoutText(text) {
 
       if (y < minY) minY = y;
       if (y > maxY) maxY = y;
+
+      if (index < minIndex) minIndex = index;
 
       leds.push({
         index,
@@ -52,5 +54,6 @@ export function parseLayoutText(text) {
     minY,
     rows,
     width,
+    minIndex,
   };
 }
