@@ -14,6 +14,8 @@ export function parseLayoutText(text) {
 
   let minX, minY, maxX, maxY, width, height, minIndex;
 
+  const duplicateIndices = [];
+
   minX = minY = minIndex = 1000000;
   maxX = maxY = -1000000;
 
@@ -33,6 +35,10 @@ export function parseLayoutText(text) {
       if (y > maxY) maxY = y;
 
       if (index < minIndex) minIndex = index;
+
+      if (leds.some(l => l.index === index)) {
+        duplicateIndices.push(index);
+      }
 
       leds.push({
         index,
@@ -55,5 +61,6 @@ export function parseLayoutText(text) {
     rows,
     width,
     minIndex,
+    duplicateIndices,
   };
 }

@@ -445,11 +445,15 @@ function parseCoordinates(value) {
 }
 
 function parseLayout(value) {
+  document.getElementById('layoutError').innerText = '';
+
   if (!value) value = textAreaLayout.value;
   const results = parseLayoutText(value);
 
   if (results.minIndex !== 0) {
-    alert(`Layout should start at 0 instead of ${results.minIndex}`);
+    document.getElementById('layoutError').innerText = `Layout should start at 0 instead of ${results.minIndex}`;
+  } else if (results.duplicateIndices.length > 0) {
+    document.getElementById('layoutError').innerText = `Duplicate indices found: ${results.duplicateIndices.join(', ')}`;
   }
 
   // destructure the results into our global variables
@@ -598,7 +602,7 @@ function render() {
 
     if (showPreviewNumbers) {
       context.fillStyle = !showPreviewLEDs ? fillStyle : "white";
-      context.fillText(led.index, x + ledWidth / 2, y + ledHeight / 2);
+      context.fillText(i, x + ledWidth / 2, y + ledHeight / 2);
     }
   }
 
