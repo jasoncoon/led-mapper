@@ -166,14 +166,14 @@ minAngle: ${minAngle}
 maxAngle: ${maxAngle}
 minRadius: ${minRadius}
 maxRadius: ${maxRadius}
-minX256: ${minX256}
-maxX256: ${maxX256}
-minY256: ${minY256}
-maxY256: ${maxY256}
-minAngle256: ${minAngle256}
-maxAngle256: ${maxAngle256}
-minRadius256: ${minRadius256}
-maxRadius256: ${maxRadius256}`;
+minX256: ${minX256.toFixed(0)}
+maxX256: ${maxX256.toFixed(0)}
+minY256: ${minY256.toFixed(0)}
+maxY256: ${maxY256.toFixed(0)}
+minAngle256: ${minAngle256.toFixed(0)}
+maxAngle256: ${maxAngle256.toFixed(0)}
+minRadius256: ${minRadius256.toFixed(0)}
+maxRadius256: ${maxRadius256.toFixed(0)}`;
 
   return {
     stats,
