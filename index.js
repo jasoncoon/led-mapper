@@ -28,7 +28,7 @@ const inputPreviewFontSize = document.getElementById("inputPreviewFontSize");
 const inputPreviewSpeed = document.getElementById("inputPreviewSpeed");
 
 const selectPalette = document.getElementById("selectPalette");
-const selectPattern = document.getElementById("selectPattern");
+const selectPreviewText = document.getElementById("selectPreviewText");
 
 const textAreaCoordinates = document.getElementById("textAreaCoordinates");
 const textAreaLayout = document.getElementById("textAreaLayout");
@@ -37,7 +37,7 @@ const textAreaPixelblaze = document.getElementById("textAreaPixelblaze");
 const renderError = document.getElementById("renderError");
 
 // define some global variables (working on eliminating these)
-let width, height, rows, leds, maxX, maxY, minX, minY, coordsX, coordsY, angles, radii;
+let width, height, rows, leds, maxIndex, maxX, maxY, minIndex, minX, minY, coordsX, coordsY, angles, radii, duplicateIndices, gaps;
 
 let offset = 0;
 let offsetIncrement = 1.0;
@@ -45,6 +45,7 @@ let offsetIncrement = 1.0;
 let running = true;
 let showPreviewNumbers = false;
 let showPreviewLEDs = true;
+let previewNumberSource = 'index';
 
 let renderFunction = undefined;
 
@@ -253,6 +254,26 @@ function onShowPreviewNumbersChange() {
   if (!running) window.requestAnimationFrame(render);
 }
 
+function onPreviewTextChange() {
+  switch(selectPreviewText.value) {
+    case "Index":
+      previewNumberSource = 'index';
+      break;
+    case "X":
+      previewNumberSource = 'x256';
+      break;
+    case "Y":
+      previewNumberSource = 'y256';
+      break;
+    case "Angle":
+      previewNumberSource = 'angle256';
+      break;
+    case "Radius":
+      previewNumberSource = 'radius256';
+      break;
+  }
+}
+
 function onTextLayoutChange() {
   parseLayout();
   generateCode();
@@ -317,6 +338,7 @@ function addEventHandlers() {
 
   document.getElementById("checkboxShowPreviewLEDs").onchange = onShowPreviewLEDsChange;
   document.getElementById("checkboxShowPreviewNumbers").onchange = onShowPreviewNumbersChange;
+  document.getElementById("selectPreviewText").onchange = onPreviewTextChange;
 
   document.getElementById("form").onsubmit = onFormSubmit;
 
@@ -339,9 +361,16 @@ function configureCanvas2dContext() {
 }
 
 function ColorFromPalette(palette, index, brightness = 255) {
-  while (index > 255) index -= 256;
-  while (index < 0) index += 256;
-  const imageData = contextSelectedPalette.getImageData(index, 0, canvasSelectedPalette.width, canvasSelectedPalette.height);
+  let fixedIndex = index;
+  while (fixedIndex > 255) fixedIndex -= 256;
+  while (fixedIndex < 0) fixedIndex += 256;
+  let imageData;
+  try {
+    imageData = contextSelectedPalette.getImageData(fixedIndex, 0, canvasSelectedPalette.width, canvasSelectedPalette.height);
+  } catch(error) {
+    console.error(`Error getting color from palette. index: ${index}, fixedIndex: ${fixedIndex}`, error);
+    throw error;
+  }
   const data = imageData.data;
 
   while (brightness > 255) brightness -= 256;
@@ -407,7 +436,7 @@ function generateCode() {
   const centerX = inputCenterX.value;
   const centerY = inputCenterY.value;
 
-  const results = generateFastLedMapCode({ centerX, centerY, leds, maxX, maxY, minX, minY });
+  const results = generateFastLedMapCode({ centerX, centerY, leds, maxX, maxY, minX, minY, minIndex, maxIndex });
 
   // destructure the results into our global variables
   ({ coordsX, coordsY, angles, radii } = results);
@@ -450,14 +479,26 @@ function parseLayout(value) {
   if (!value) value = textAreaLayout.value;
   const results = parseLayoutText(value);
 
-  if (results.minIndex !== 0) {
-    document.getElementById('layoutError').innerText = `Layout should start at 0 instead of ${results.minIndex}`;
-  } else if (results.duplicateIndices.length > 0) {
-    document.getElementById('layoutError').innerText = `Duplicate indices found: ${results.duplicateIndices.join(', ')}`;
+  // destructure the results into our global variables
+  ({ height, leds, maxX, maxY, minX, minY, rows, width, minIndex, maxIndex, duplicateIndices, gaps } = results);
+
+  let errors = [];
+
+  if (leds.length !== maxIndex + 1) {
+    errors.push(`Layout has ${leds.length} LEDs but only ${maxIndex + 1} unique LED indices.`);
+  }
+  if (minIndex !== 0) {
+    errors.push(`Layout should start at 0 instead of ${minIndex}.`);
+  } 
+  if (duplicateIndices.length > 0) {
+    errors.push(`Duplicate indices found: ${duplicateIndices.join(', ')}.`);
+  } 
+  if (gaps.length > 0) {
+    errors.push(`Gaps found at indices: ${gaps.join(', ')}.`);
   }
 
-  // destructure the results into our global variables
-  ({ height, leds, maxX, maxY, minX, minY, rows, width } = results);
+  errors.forEach(error => console.error(error));
+  document.getElementById('layoutError').innerHTML = errors.join('<br />');
 
   document.getElementById("codeParsedLayout").innerText = JSON.stringify(rows);
 
@@ -538,10 +579,10 @@ function parseQueryString() {
   }
 }
 
-function handleRenderFunctionError(error) {
+function handleRenderFunctionError(error, led) {
   renderFunction = undefined;
   console.error({ error });
-  renderError.innerText = `Error: ${error.message}.`;
+  renderError.innerText = `Error: ${error.message}, LED: ${JSON.stringify(led)}.`;
 }
 
 function render() {
@@ -580,7 +621,7 @@ function render() {
     try {
       fillStyle = renderFunction(angles, beat8, beatsin8, CHSV, ColorFromPalette, coordsX, coordsY, cos8, CRGB, currentPalette, i, offset, radii, sin8, speed);
     } catch (error) {
-      handleRenderFunctionError(error);
+      handleRenderFunctionError(error, led);
       return;
     }
 
@@ -602,7 +643,7 @@ function render() {
 
     if (showPreviewNumbers) {
       context.fillStyle = !showPreviewLEDs ? fillStyle : "white";
-      context.fillText(i, x + ledWidth / 2, y + ledHeight / 2);
+      context.fillText(led[previewNumberSource].toFixed(0), x + ledWidth / 2, y + ledHeight / 2);
     }
   }
 

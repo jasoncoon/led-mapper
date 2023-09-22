@@ -159,7 +159,7 @@
                   <div class="text-muted">
                     Paste an LED layout copied from
                     <a href="https://sheets.google.com" target="_blank" rel="noopener noreferrer">Google Sheets</a>
-                    or other spreadsheet in tab-delimited text format, with a unique LED index in each cell. LED indexes should start at zero. Cells without an LED should be empty.
+                    or other spreadsheet in tab-delimited text format, with a unique LED index in each cell. LED indices should start at zero. Cells without an LED should be empty.
                   </div>
                   <textarea class="form-control" id="textAreaLayout" rows="7" style="white-space: pre; overflow-wrap: normal; overflow-x: auto;">
 	0	1	2	3	4	5	6		7	8	9	10	11	12	13	
@@ -546,6 +546,16 @@ i	x	y
                   <i id="iconShowPreviewNumbers" class="bi bi-square"></i>
                   Numbers</label
                 >
+                <div class="input-group" title="LED Number Text">
+                  <div class="input-group-text">Text</div>
+                  <select id="selectPreviewText" class="form-control" style="width: 5rem">
+                    <option>Index</option>
+                    <option>X</option>
+                    <option>Y</option>
+                    <option>Angle</option>
+                    <option>Radius</option>
+                  </select>
+                </div>
                 <div class="input-group" title="LED Numbers Font Size">
                   <div class="input-group-text">Size</div>
                   <input id="inputPreviewFontSize" class="form-control" type="number" step="0.25" min="0.25" value="10" style="width: 5rem" />

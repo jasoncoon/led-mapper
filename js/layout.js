@@ -12,12 +12,12 @@ export function parseLayoutText(text) {
 
   const leds = [];
 
-  let minX, minY, maxX, maxY, width, height, minIndex;
+  let minX, minY, maxX, maxY, width, height, minIndex, maxIndex;
 
   const duplicateIndices = [];
 
   minX = minY = minIndex = 1000000;
-  maxX = maxY = -1000000;
+  maxX = maxY = maxIndex = -1000000;
 
   for (let y = 0; y < rows.length; y++) {
     const row = rows[y];
@@ -34,7 +34,8 @@ export function parseLayoutText(text) {
       if (y < minY) minY = y;
       if (y > maxY) maxY = y;
 
-      if (index < minIndex) minIndex = index;
+      minIndex = Math.min(minIndex, index);
+      maxIndex = Math.max(maxIndex, index);
 
       if (leds.some(l => l.index === index)) {
         duplicateIndices.push(index);
@@ -51,6 +52,18 @@ export function parseLayoutText(text) {
   width = maxX - minX + 1;
   height = maxY - minY + 1;
 
+  let previousIndex = -1;
+  const gaps = [];
+  const sorted = [...leds].sort((a, b) => a.index - b.index);
+
+  for (const led of sorted) {
+    const index = led.index;
+    if (index - 1 !== previousIndex && !duplicateIndices.includes(index)) {
+      gaps.push(index);
+    }
+    previousIndex = index;
+  }
+
   return {
     height,
     leds,
@@ -61,6 +74,8 @@ export function parseLayoutText(text) {
     rows,
     width,
     minIndex,
+    maxIndex,
     duplicateIndices,
+    gaps
   };
 }

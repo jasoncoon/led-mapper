@@ -73,7 +73,7 @@ export function CRGB(r, g, b) {
 }
 
 export function generateFastLedMapCode(args) {
-  const { centerX, centerY, leds, maxX, maxY, minX, minY } = args;
+  const { centerX, centerY, leds, maxX, maxY, minX, minY, minIndex, maxIndex } = args;
 
   let minX256, minY256, minAngle, minAngle256, minRadius, minRadius256;
   let maxX256, maxY256, maxAngle, maxAngle256, maxRadius, maxRadius256;
@@ -105,17 +105,17 @@ export function generateFastLedMapCode(args) {
   }
 
   for (const led of leds) {
-    const { x, y, angle, radius } = led;
+    const { index, x, y, angle, radius } = led;
 
     let x256 = mapNumber(x, minX, maxX, 0, 255);
     let y256 = mapNumber(y, minY, maxY, 0, 255);
     let angle256 = mapNumber(angle, 0, 360, 0, 255);
     let radius256 = mapNumber(radius, 0, maxRadius, 0, 255);
 
-    led.x256 = x256;
-    led.y256 = y256;
-    led.angle256 = angle256;
-    led.radius256 = radius256;
+    led.x256 = Math.round(x256);
+    led.y256 = Math.round(y256);
+    led.angle256 = Math.round(angle256);
+    led.radius256 = Math.round(radius256);
 
     if (x256 < minX256) minX256 = x256;
     if (x256 > maxX256) maxX256 = x256;
@@ -158,6 +158,12 @@ export function generateFastLedMapCode(args) {
   ].join("\n");
 
   const stats = `LEDs: ${leds.length}
+coordsX length: ${coordsX.length}
+coordsY length: ${coordsY.length}
+angles length: ${angles.length}
+radii length: ${radii.length}
+minIndex: ${minIndex}
+maxIndex: ${maxIndex}
 minX: ${minX}
 maxX: ${maxX}
 minY: ${minY}
@@ -174,6 +180,8 @@ minAngle256: ${minAngle256.toFixed(0)}
 maxAngle256: ${maxAngle256.toFixed(0)}
 minRadius256: ${minRadius256.toFixed(0)}
 maxRadius256: ${maxRadius256.toFixed(0)}`;
+
+  // leds: ${JSON.stringify(leds, null, 2)}
 
   return {
     stats,
