@@ -120,14 +120,14 @@
                   <ul class="nav nav-tabs card-header-tabs">
                     <li class="nav-item" role="presentation">
                       <button
-                        class="nav-link"
+                        class="nav-link active"
                         id="layout-input-tab"
                         data-bs-toggle="tab"
                         data-bs-target="#layout-input"
                         type="button"
                         role="tab"
                         aria-controls="layout-input"
-                        aria-selected="false"
+                        aria-selected="true"
                       >
                         Layout
                       </button>
@@ -162,14 +162,14 @@
                     </li>
                     <li class="nav-item" role="presentation">
                       <button
-                        class="nav-link active"
+                        class="nav-link"
                         id="image-input-tab"
                         data-bs-toggle="tab"
                         data-bs-target="#image-input"
                         type="button"
                         role="tab"
                         aria-controls="image-input"
-                        aria-selected="true"
+                        aria-selected="false"
                       >
                         Image
                       </button>
@@ -178,7 +178,7 @@
                 </div>
                 <div class="card-body">
                   <div class="tab-content">
-                    <div class="tab-pane fade" id="layout-input" role="tabpanel" aria-labelledby="layout-input-tab">
+                    <div class="tab-pane fade show active" id="layout-input" role="tabpanel" aria-labelledby="layout-input-tab">
                       <div class="text-muted">
                         Paste an LED layout copied from
                         <a href="https://sheets.google.com" target="_blank" rel="noopener noreferrer">Google Sheets</a>
@@ -238,7 +238,7 @@
                         </div>
                       </div>
                     </div>
-                    <div class="tab-pane fade show active" id="image-input" role="tabpanel" aria-labelledby="image-input-tab">
+                    <div class="tab-pane fade" id="image-input" role="tabpanel" aria-labelledby="image-input-tab">
                       <div>
                         <span class="text-muted mr-1">
                           Browse to an image or photo, then click to mark all the LEDs in the order they're wired physically. The Pixelblaze Map tab will be updated with the results.
@@ -248,12 +248,12 @@
                             <input id="inputImage" type="file" class="form-control" style="width: auto;"></input>
                           </div>
                           <div class="btn-group" role="group">
-                            <button id="buttonImageInputUndo" type="button" class="btn btn-outline-secondary" title="Undo"><i class="bi bi-arrow-counterclockwise"></i></button>
+                            <button id="buttonImageInputUndo" type="button" class="btn btn-outline-secondary" title="Undo (ctrl+z or cmd+z)"><i class="bi bi-arrow-counterclockwise"></i></button>
                           </div>
                         </div>
                       </div>
                       <div class="mt-1" style="width: 100%">
-                        <canvas id="canvasImageInput" style="width: 100%" width="1024" height="768"></canvas>
+                        <canvas id="canvasImageInput" style="width: 100%" width="1024" height="768" tabindex="1"></canvas>
                       </div>
                     </div>
                   </div>

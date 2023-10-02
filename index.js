@@ -118,7 +118,10 @@ function onGenerateCode() {
 }
 
 function onCanvasImageInputKeyDown(event) {
-  console.log(event);
+  console.log({key: event.key, ctrlKey: event.ctrlKey, metaKey: event.metaKey});
+  if (event.key === 'Backspace' || (event.key === 'z' && (event.ctrlKey || event.metaKey))) {
+    onImageInputUndo();
+  }
 }
 
 function onImageInputChange(event) {
