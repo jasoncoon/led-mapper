@@ -78,8 +78,8 @@ export function generateFastLedMapCode(args) {
   let minX256, minY256, minAngle, minAngle256, minRadius, minRadius256;
   let maxX256, maxY256, maxAngle, maxAngle256, maxRadius, maxRadius256;
 
-  minX256 = minY256 = minAngle = minAngle256 = minRadius = minRadius256 = 1000000;
-  maxX256 = maxY256 = maxAngle = maxAngle256 = maxRadius = maxRadius256 = -1000000;
+  minX256 = minY256 = minAngle = minAngle256 = minRadius = minRadius256 = Number.MAX_VALUE;
+  maxX256 = maxY256 = maxAngle = maxAngle256 = maxRadius = maxRadius256 = Number.MIN_VALUE;
 
   // use the center defined by the user
 
