@@ -377,8 +377,9 @@ function copyLinkToClipboard(element, queryParam, name) {
   element.select();
   element.setSelectionRange(0, 99999); /* For mobile devices */
   const text = element.value;
-  const data = btoa(text);
-  console.log({location: location.toString(), search: location.search, data});
+  // const data = btoa(text);
+  const data = LZString.compressToEncodedURIComponent(text);
+  // console.log({location: location.toString(), search: location.search, data});
   navigator.clipboard.writeText(`${location.toString().replace(location.search, "")}?${queryParam}=${data}`);
 
   const div = document.getElementById(`divCopy${name}Input`);
@@ -424,7 +425,7 @@ function generateCode() {
 }
 
 function generatePixelblazeMap() {
-  const map = leds.map((led) => `[${led.x},${led.y}]`).join(",");
+  const map = leds.map((led) => `[${+led.x.toFixed(3)},${+led.y.toFixed(3)}]`).join(",");
   codePixelblaze.innerText = `[${map}]`;
 }
 
@@ -484,24 +485,27 @@ function parseQueryString() {
   let data;
   let tabName;
   if (coordinates) {
-    data = atob(coordinates);
+    // data = atob(coordinates);
+    data = LZString.decompressFromEncodedURIComponent(coordinates);
     textAreaCoordinates.value = data;
     tabName = 'coordinates';
     parseCoordinates();
   } else if (layout) {
-    data = atob(layout);
+    // data = atob(layout);
+    data = LZString.decompressFromEncodedURIComponent(layout);
     textAreaLayout.value = data;
     tabName = 'layout';
     parseLayout();
   } else if (pixelblaze) { 
-    data = atob(pixelblaze);
-    console.log({data});
+    // data = atob(pixelblaze);
+    data = LZString.decompressFromEncodedURIComponent(pixelblaze);
+    // console.log({data});
     textAreaPixelblaze.value = data;
     tabName = 'pixelblaze';
     parsePixelblaze();
   }
 
-  console.log({search: location.search, data, tabName});
+  // console.log({search: location.search, data, tabName});
 
   const tabNames = ['coordinates', 'layout', 'pixelblaze'];
 
