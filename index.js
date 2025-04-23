@@ -1,22 +1,29 @@
 import { getColorAtBrightness } from "./js/color.js";
-import { parseCoordinatesText } from "./js/coordinates.js";
-import { beat8, beatsin8, CHSV, cos8, CRGB, generateFastLedMapCode, sin8 } from "./js/fastled.js";
-import { parseLayoutText } from "./js/layout.js";
+import { defaultCoordinates, parseCoordinatesText } from "./js/coordinates.js";
+import { CHSV, CRGB, beat8, beatsin8, cos8, generateFastLedMapCode, sin8 } from "./js/fastled.js";
+import { drawImageMap, getCursorPosition } from "./js/image.js";
+import { defaultLayout, parseLayoutText } from "./js/layout.js";
 import { mapNumber } from "./js/math.js";
 import { palettes } from "./js/palettes.js";
 import { getPatternCode } from "./js/patterns.js";
-import { parsePixelblazeText } from "./js/pixelblaze.js";
+import { defaultPixelblazeMap, parsePixelblazeText } from "./js/pixelblaze.js";
+
+let imageInput;
+let imageScaleFactor = 1;
+const devicePixelRatio = window.devicePixelRatio || 1;
 
 // get some elements by id
 const buttonPlayPause = document.getElementById("buttonPlayPause");
 
 const canvasPreview = document.getElementById("canvasPreview");
+const canvasImageInput = document.getElementById("canvasImageInput");
 const canvasSelectedPalette = document.getElementById("canvasSelectedPalette");
 
 const codeFastLED = document.getElementById("codeFastLED");
 const codePixelblaze = document.getElementById("codePixelblaze");
 
 const context = canvasPreview.getContext("2d");
+const contextImageInput = canvasImageInput.getContext("2d");
 const contextSelectedPalette = canvasSelectedPalette.getContext("2d");
 
 const inputCenterX = document.getElementById("inputCenterX");
@@ -26,9 +33,10 @@ const inputWidth = document.getElementById("inputWidth");
 const inputPreviewCode = document.getElementById("inputPreviewCode");
 const inputPreviewFontSize = document.getElementById("inputPreviewFontSize");
 const inputPreviewSpeed = document.getElementById("inputPreviewSpeed");
+const inputImage = document.getElementById("inputImage");
 
 const selectPalette = document.getElementById("selectPalette");
-const selectPattern = document.getElementById("selectPattern");
+const selectPreviewText = document.getElementById("selectPreviewText");
 
 const textAreaCoordinates = document.getElementById("textAreaCoordinates");
 const textAreaLayout = document.getElementById("textAreaLayout");
@@ -37,7 +45,7 @@ const textAreaPixelblaze = document.getElementById("textAreaPixelblaze");
 const renderError = document.getElementById("renderError");
 
 // define some global variables (working on eliminating these)
-let width, height, rows, leds, maxX, maxY, minX, minY, coordsX, coordsY, angles, radii;
+let width, height, rows, leds, maxIndex, maxX, maxY, minIndex, minX, minY, coordsX, coordsY, angles, radii, duplicateIndices, gaps;
 
 let offset = 0;
 let offsetIncrement = 1.0;
@@ -45,6 +53,7 @@ let offsetIncrement = 1.0;
 let running = true;
 let showPreviewNumbers = false;
 let showPreviewLEDs = true;
+let previewNumberSource = 'index';
 
 let renderFunction = undefined;
 
@@ -64,7 +73,7 @@ function onCopyCodeClick() {
 
 function onCopyCoordinatesClick() {
   copyElementValueToClipboard(textAreaCoordinates);
-  const div = document.getElementById("divCopyCoordinates");
+  const div = document.getElementById("divCopyCoordinatesInput");
   div.innerText = "Copied to clipboard";
   div.className = "visible input-group-text";
 
@@ -73,7 +82,7 @@ function onCopyCoordinatesClick() {
 
 function onCopyLayoutClick() {
   copyElementValueToClipboard(textAreaLayout);
-  const div = document.getElementById("divCopyLayout");
+  const div = document.getElementById("divCopyLayoutInput");
   div.innerText = "Copied to clipboard";
   div.className = "visible input-group-text";
 
@@ -106,6 +115,107 @@ function onFormSubmit(event) {
 
 function onGenerateCode() {
   generateCode();
+}
+
+function onCanvasImageInputKeyDown(event) {
+  console.log({key: event.key, ctrlKey: event.ctrlKey, metaKey: event.metaKey});
+  if (event.key === 'Backspace' || (event.key === 'z' && (event.ctrlKey || event.metaKey))) {
+    onImageInputUndo();
+  }
+}
+
+function onImageInputChange(event) {
+  const files = [...event.target.files];
+  console.log({files});
+  const file = files.find(f => /image/.test(f.type));
+  if (!file) {
+    alert('Invalid file');
+    return;
+  }
+  const url = window.URL || window.webkitURL;
+  const objectUrl = url.createObjectURL(file);
+
+  contextImageInput.clearRect(0, 0, canvasImageInput.width, canvasImageInput.height);
+  imageInput = new Image();
+
+  imageInput.onload = () => {
+    contextImageInput.imageSmoothingEnabled = imageInput.width > 255 || imageInput.height > 255;
+
+    let canvasWidth = canvasImageInput.width;
+    let canvasHeight = canvasImageInput.height;
+
+    console.log({canvasWidth, canvasHeight});
+    
+    const imageWidth = imageInput.width;
+    const imageHeight = imageInput.height;
+
+    canvasWidth = canvasWidth * devicePixelRatio;
+    canvasHeight = imageHeight / imageWidth * canvasWidth;
+
+    canvasImageInput.width = canvasWidth;
+    canvasImageInput.height = canvasHeight;
+
+    imageScaleFactor = canvasImageInput.width / imageInput.width;
+
+    console.log({imageWidth, imageHeight, canvasWidth, canvasHeight, devicePixelRatio, imageScaleFactor});
+
+    contextImageInput.drawImage(imageInput, 0, 0, canvasWidth, canvasHeight);
+
+    textAreaPixelblaze.value = "[]";
+  };
+
+  imageInput.src = objectUrl;
+}
+
+function onImageInputUndo() {
+  if (!imageInput) return;
+
+  const { leds } = parsePixelblazeText(textAreaPixelblaze.value);
+
+  if (leds.length < 1) return;
+
+  leds.pop();
+
+  textAreaPixelblaze.value = JSON.stringify(leds.map(({x, y}) => ([x, y])));
+
+  parsePixelblaze();
+  
+  refreshImageMap();
+}
+
+function onImageCanvasClick(event) {
+  if (!imageInput) return;
+  
+  const {x, y} = getCursorPosition(canvasImageInput, imageScaleFactor, event);
+
+  const { leds } = parsePixelblazeText(textAreaPixelblaze.value);
+
+  leds.push({index: leds.length, x, y});
+
+  textAreaPixelblaze.value = JSON.stringify(leds.map(({x, y}) => ([x, y])));
+
+  parsePixelblaze();
+
+  renderScale = false;
+  const scale = renderScale ? 256 : width > height ? width : height;
+  document.getElementById("buttonToggleScale").innerText = `Scale: ${scale}`;
+
+  showPreviewNumbers = true;
+  document.getElementById("iconShowPreviewNumbers").className = showPreviewNumbers ? "bi bi-check-square" : "bi bi-square";
+  inputPreviewFontSize.disabled = false;
+
+  showPreviewLEDs = false;
+  document.getElementById("iconShowPreviewLEDs").className = showPreviewLEDs ? "bi bi-check-square" : "bi bi-square";
+ 
+  refreshImageMap();
+}
+
+function refreshImageMap() {
+  const fontSize = inputPreviewFontSize.value;
+
+  context.font = `${fontSize}px monospace`;
+
+  drawImageMap(contextImageInput, canvasImageInput, imageInput, imageScaleFactor, leds, fontSize);
 }
 
 function onLinkCoordinates() {
@@ -165,14 +275,14 @@ function onPaletteChange() {
   });
   contextSelectedPalette.fillStyle = gradient;
   contextSelectedPalette.fillRect(0, 0, canvasSelectedPalette.width, canvasSelectedPalette.height);
-  if (!running) window.requestAnimationFrame(render);
+  if (!running) window.requestAnimationFrame(renderPreview);
 }
 
 function onPatternChange() {
   const code = getPatternCode(selectPattern.value);
   inputPreviewCode.value = code;
   onPreviewCodeChange();
-  if (!running) window.requestAnimationFrame(render);
+  if (!running) window.requestAnimationFrame(renderPreview);
 }
 
 function onPlayPauseClick() {
@@ -205,7 +315,7 @@ function onPreviewCodeChange() {
       "speed",
       code
     );
-    window.requestAnimationFrame(render);
+    window.requestAnimationFrame(renderPreview);
   } catch (error) {
     handleRenderFunctionError(error);
     return;
@@ -214,7 +324,7 @@ function onPreviewCodeChange() {
 
 function onPreviewFontSizeChange() {
   context.font = `${inputPreviewFontSize.value}px monospace`;
-  if (!running) window.requestAnimationFrame(render);
+  if (!running) window.requestAnimationFrame(renderPreview);
 }
 
 function onPreviewSpeedChange() {
@@ -240,7 +350,7 @@ function onShowPreviewLEDsChange() {
 
   document.getElementById("iconShowPreviewLEDs").className = showPreviewLEDs ? "bi bi-check-square" : "bi bi-square";
 
-  if (!running) window.requestAnimationFrame(render);
+  if (!running) window.requestAnimationFrame(renderPreview);
 }
 
 function onShowPreviewNumbersChange() {
@@ -250,7 +360,27 @@ function onShowPreviewNumbersChange() {
 
   inputPreviewFontSize.disabled = !showPreviewNumbers;
 
-  if (!running) window.requestAnimationFrame(render);
+  if (!running) window.requestAnimationFrame(renderPreview);
+}
+
+function onPreviewTextChange() {
+  switch(selectPreviewText.value) {
+    case "Index":
+      previewNumberSource = 'index';
+      break;
+    case "X":
+      previewNumberSource = 'x256';
+      break;
+    case "Y":
+      previewNumberSource = 'y256';
+      break;
+    case "Angle":
+      previewNumberSource = 'angle256';
+      break;
+    case "Radius":
+      previewNumberSource = 'radius256';
+      break;
+  }
 }
 
 function onTextLayoutChange() {
@@ -262,7 +392,7 @@ function onToggleScale() {
   renderScale = !renderScale;
   const scale = renderScale ? 256 : width > height ? width : height;
   document.getElementById("buttonToggleScale").innerText = `Scale: ${scale}`;
-  if (!running) window.requestAnimationFrame(render);
+  if (!running) window.requestAnimationFrame(renderPreview);
 }
 
 function onWindowResize() {
@@ -275,7 +405,7 @@ function onWindowResize() {
   context.textAlign = "center";
   context.textBaseline = "middle";
 
-  if (!running) window.requestAnimationFrame(render);
+  if (!running) window.requestAnimationFrame(renderPreview);
 }
 
 // functions
@@ -287,6 +417,8 @@ function addEventHandlers() {
   inputPreviewCode.oninput = onPreviewCodeChange;
   inputPreviewFontSize.oninput = onPreviewFontSizeChange;
   inputPreviewSpeed.oninput = onPreviewSpeedChange;
+
+  inputImage.onchange = onImageInputChange;
 
   selectPalette.onchange = onPaletteChange;
   selectPattern.onchange = onPatternChange;
@@ -311,12 +443,14 @@ function addEventHandlers() {
   document.getElementById("buttonPreviousPalette").onclick = onPreviousPaletteClick;
   document.getElementById("buttonPreviousPattern").onclick = onPreviousPatternClick;
   document.getElementById("buttonToggleScale").onclick = onToggleScale;
+  document.getElementById("buttonImageInputUndo").onclick = onImageInputUndo;
 
   document.getElementById("checkboxFlipX").onchange = flipX;
   document.getElementById("checkboxFlipY").onchange = flipY;
 
   document.getElementById("checkboxShowPreviewLEDs").onchange = onShowPreviewLEDsChange;
   document.getElementById("checkboxShowPreviewNumbers").onchange = onShowPreviewNumbersChange;
+  document.getElementById("selectPreviewText").onchange = onPreviewTextChange;
 
   document.getElementById("form").onsubmit = onFormSubmit;
 
@@ -329,19 +463,29 @@ function addEventHandlers() {
   elem.parentElement.addEventListener("wheel", panzoom.zoomWithWheel);
 
   document.getElementById("buttonReset").onclick = panzoom.reset;
+
+  canvasImageInput.onclick = onImageCanvasClick;
+  canvasImageInput.onkeydown = onCanvasImageInputKeyDown;
 }
 
 function configureCanvas2dContext() {
   context.lineWidth = 1;
   context.textAlign = "center";
   context.textBaseline = "middle";
-  context.font = "1px monospace";
+  context.font = "20px monospace";
 }
 
 function ColorFromPalette(palette, index, brightness = 255) {
-  while (index > 255) index -= 256;
-  while (index < 0) index += 256;
-  const imageData = contextSelectedPalette.getImageData(index, 0, canvasSelectedPalette.width, canvasSelectedPalette.height);
+  let fixedIndex = index;
+  while (fixedIndex > 255) fixedIndex -= 256;
+  while (fixedIndex < 0) fixedIndex += 256;
+  let imageData;
+  try {
+    imageData = contextSelectedPalette.getImageData(fixedIndex, 0, canvasSelectedPalette.width, canvasSelectedPalette.height);
+  } catch(error) {
+    console.error(`Error getting color from palette. index: ${index}, fixedIndex: ${fixedIndex}`, error);
+    throw error;
+  }
   const data = imageData.data;
 
   while (brightness > 255) brightness -= 256;
@@ -407,7 +551,7 @@ function generateCode() {
   const centerX = inputCenterX.value;
   const centerY = inputCenterY.value;
 
-  const results = generateFastLedMapCode({ centerX, centerY, leds, maxX, maxY, minX, minY });
+  const results = generateFastLedMapCode({ centerX, centerY, leds, maxX, maxY, minX, minY, minIndex, maxIndex });
 
   // destructure the results into our global variables
   ({ coordsX, coordsY, angles, radii } = results);
@@ -419,7 +563,9 @@ function generateCode() {
 
   document.getElementById("codeStats").innerText = stats;
 
-  if (!running) window.requestAnimationFrame(render);
+  if (!running) window.requestAnimationFrame(renderPreview);
+
+  if (imageInput) refreshImageMap();
 
   generatePixelblazeMap();
 }
@@ -445,11 +591,31 @@ function parseCoordinates(value) {
 }
 
 function parseLayout(value) {
+  document.getElementById('layoutError').innerText = '';
+
   if (!value) value = textAreaLayout.value;
   const results = parseLayoutText(value);
 
   // destructure the results into our global variables
-  ({ height, leds, maxX, maxY, minX, minY, rows, width } = results);
+  ({ height, leds, maxX, maxY, minX, minY, rows, width, minIndex, maxIndex, duplicateIndices, gaps } = results);
+
+  let errors = [];
+
+  if (leds.length !== maxIndex + 1) {
+    errors.push(`Layout has ${leds.length} LEDs but only ${maxIndex + 1} unique LED indices.`);
+  }
+  if (minIndex !== 0) {
+    errors.push(`Layout should start at 0 instead of ${minIndex}.`);
+  } 
+  if (duplicateIndices.length > 0) {
+    errors.push(`Duplicate indices found: ${duplicateIndices.join(', ')}.`);
+  } 
+  if (gaps.length > 0) {
+    errors.push(`Gaps found at indices: ${gaps.join(', ')}.`);
+  }
+
+  errors.forEach(error => console.error(error));
+  document.getElementById('layoutError').innerHTML = errors.join('<br />');
 
   document.getElementById("codeParsedLayout").innerText = JSON.stringify(rows);
 
@@ -529,13 +695,13 @@ function parseQueryString() {
   }
 }
 
-function handleRenderFunctionError(error) {
+function handleRenderFunctionError(error, led) {
   renderFunction = undefined;
   console.error({ error });
-  renderError.innerText = `Error: ${error.message}.`;
+  renderError.innerText = `Error: ${error.message}, LED: ${JSON.stringify(led)}.`;
 }
 
-function render() {
+function renderPreview() {
   if (renderFunction === undefined) return;
 
   offset += offsetIncrement;
@@ -571,7 +737,7 @@ function render() {
     try {
       fillStyle = renderFunction(angles, beat8, beatsin8, CHSV, ColorFromPalette, coordsX, coordsY, cos8, CRGB, currentPalette, i, offset, radii, sin8, speed);
     } catch (error) {
-      handleRenderFunctionError(error);
+      handleRenderFunctionError(error, led);
       return;
     }
 
@@ -593,11 +759,11 @@ function render() {
 
     if (showPreviewNumbers) {
       context.fillStyle = !showPreviewLEDs ? fillStyle : "white";
-      context.fillText(led.index, x + ledWidth / 2, y + ledHeight / 2);
+      context.fillText(led[previewNumberSource].toFixed(0), x + ledWidth / 2, y + ledHeight / 2);
     }
   }
 
-  if (running) window.requestAnimationFrame(render);
+  if (running) window.requestAnimationFrame(renderPreview);
 }
 
 function setRunning(value) {
@@ -606,11 +772,22 @@ function setRunning(value) {
 
   buttonPlayPause.title = running ? "Pause" : "Play";
 
-  if (running) window.requestAnimationFrame(render);
+  if (running) window.requestAnimationFrame(renderPreview);
+}
+
+function initDefaultInputs() {
+  textAreaLayout.value = defaultLayout;
+
+  textAreaCoordinates.value = defaultCoordinates;
+
+  textAreaPixelblaze.value = defaultPixelblazeMap;
 }
 
 // initial setup function calls
+initDefaultInputs();
+
 addEventHandlers();
+
 configureCanvas2dContext();
 if (!parseQueryString()) {
   parseLayout();
@@ -618,6 +795,6 @@ if (!parseQueryString()) {
 generateCode();
 onPatternChange();
 onPaletteChange();
-window.requestAnimationFrame(render);
+window.requestAnimationFrame(renderPreview);
 
 onWindowResize();
