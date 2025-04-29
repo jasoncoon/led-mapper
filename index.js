@@ -61,6 +61,8 @@ let renderScale = false;
 
 const currentPalette = null;
 
+let duplicateCount = 0;
+
 // event handlers
 function onCopyCodeClick() {
   copyElementToClipboard(codeFastLED);
@@ -105,6 +107,136 @@ function onCopyPixelblazeInputClick() {
   div.innerText = "Copied to clipboard";
   div.className = "visible input-group-text";
   setTimeout(() => (div.className = "invisible input-group-text"), 1000);
+}
+
+function onDeleteClick() {
+  if (duplicateCount < 1) {
+    return;
+  } else if (duplicateCount === 1) {
+    document.getElementById(`formClone${duplicateCount}`).style.display = 'none';
+  } else {
+    const configDiv = document.getElementById('config');
+    const formClone = document.getElementById(`formClone${duplicateCount}`);
+    configDiv.removeChild(formClone);
+  }
+  duplicateCount--;
+}
+
+let startLeds, startMaxX, startMaxY;
+
+function onDuplicateClick() {
+  const configDiv = document.getElementById('config');
+  const formClone0 = document.getElementById('formClone0');
+  let formClone;
+
+  duplicateCount++;
+
+  if (duplicateCount === 1) {
+    formClone0.style.display = 'flex';
+    formClone = formClone0;
+    startLeds = JSON.parse(JSON.stringify(leds));
+    startMaxX = maxX;
+    startMaxY = maxY;
+    initCloneControls(0, formClone);
+  }
+
+  formClone = formClone0.cloneNode(true);
+  formClone.setAttribute('id', `formClone${duplicateCount}`);
+  configDiv.appendChild(formClone);
+  initCloneControls(duplicateCount, formClone);
+
+  const newLeds = [...leds];
+  
+  let index = leds.length;
+
+  for (const led of startLeds) {
+    const x = led.x + startMaxX;
+    const y = led.y + startMaxY;
+
+    newLeds.push({
+      index,
+      x,
+      y,
+    });
+
+    if (x < minX) minX = x;
+    if (x > maxX) maxX = x;
+
+    if (y < minY) minY = y;
+    if (y > maxY) maxY = y;
+
+    width = maxX - minX + 1;
+    height = maxY - minY + 1;
+
+    index++;
+  }
+
+  leds = newLeds;
+}
+
+function initCloneControls(duplicateCount, formClone) {
+  const inputX = formClone.querySelector('#inputXClone0');
+  inputX.setAttribute('id', `inputXClone${duplicateCount}`);
+  const inputY = formClone.querySelector('#inputYClone0');
+  inputY.setAttribute('id', `inputYClone${duplicateCount}`);
+
+  formClone.querySelector('#labelXClone0').innerText = `Set ${duplicateCount} X`;
+  formClone.querySelector('#labelYClone0').innerText = `Set ${duplicateCount} Y`;
+
+  inputX.onchange = onInputXChange;
+  inputY.onchange = onInputYChange;
+}
+
+function onInputXChange(e) {
+  const inputX = e.currentTarget;
+  const id = inputX.getAttribute('id');
+  const index = parseInt(id.replace('inputXClone', ''));
+  const inputY = document.getElementById(`inputYClone${index}`);
+  const mx = parseFloat(inputX.value);
+  const my = parseFloat(inputY.value);
+  moveLeds(index, mx, my);
+}
+
+function onInputYChange(e) {
+  const inputY = e.currentTarget;
+  const id = inputY.getAttribute('id');
+  const index = parseInt(id.replace('inputYClone', ''));
+  const inputX = document.getElementById(`inputXClone${index}`);
+  const mx = parseFloat(inputX.value);
+  const my = parseFloat(inputY.value);
+  moveLeds(index, mx, my);
+}
+
+function moveLeds(copyIndex, mx, my) {
+  const start = startLeds.length * copyIndex;
+  const end = start + startLeds.length;
+
+  console.log({copyIndex, mx, my, start, end}); 
+
+  let originalIndex = 0;
+  for (let newIndex = start; newIndex < end; newIndex++) {
+    const originalLed = startLeds[originalIndex];
+    const newLed = leds[newIndex];
+
+    const x = originalLed.x + mx;
+    const y = originalLed.y + my;
+
+    newLed.x = x;
+    newLed.y = y;
+
+    if (x < minX) minX = x;
+    if (x > maxX) maxX = x;
+
+    if (y < minY) minY = y;
+    if (y > maxY) maxY = y;
+
+    width = maxX - minX + 1;
+    height = maxY - minY + 1;
+
+    originalIndex++;
+  }
+
+  generateCode();
 }
 
 function onFormSubmit(event) {
@@ -432,6 +564,8 @@ function addEventHandlers() {
   document.getElementById("buttonCopyLayout").onclick = onCopyLayoutClick;
   document.getElementById("buttonCopyPixelblaze").onclick = onCopyPixelblazeClick;
   document.getElementById("buttonCopyPixelblazeInput").onclick = onCopyPixelblazeInputClick;
+  document.getElementById("buttonDelete").onclick = onDeleteClick;
+  document.getElementById("buttonClone").onclick = onDuplicateClick;
   document.getElementById("buttonLinkCoordinates").onclick = onLinkCoordinates;
   document.getElementById("buttonLinkLayout").onclick = onLinkLayout;
   document.getElementById("buttonLinkPixelblaze").onclick = onLinkPixelblaze;

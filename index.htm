@@ -96,10 +96,10 @@
         <div class="card-header">
           <ul class="nav nav-tabs card-header-tabs">
             <li class="nav-item" role="presentation">
-              <button class="nav-link active" id="input-tab" data-bs-toggle="tab" data-bs-target="#input" type="button" role="tab" aria-controls="input" aria-selected="true">1. Input</button>
+              <button class="nav-link" id="input-tab" data-bs-toggle="tab" data-bs-target="#input" type="button" role="tab" aria-controls="input" aria-selected="false">1. Input</button>
             </li>
             <li class="nav-item" role="presentation">
-              <button class="nav-link" id="config-tab" data-bs-toggle="tab" data-bs-target="#config" type="button" role="tab" aria-controls="config" aria-selected="false">2. Map Config</button>
+              <button class="nav-link active" id="config-tab" data-bs-toggle="tab" data-bs-target="#config" type="button" role="tab" aria-controls="config" aria-selected="true">2. Map Config</button>
             </li>
             <li class="nav-item" role="presentation">
               <button class="nav-link" id="output-tab" data-bs-toggle="tab" data-bs-target="#output" type="button" role="tab" aria-controls="output" aria-selected="false">3. Output</button>
@@ -112,7 +112,7 @@
 
         <div class="card-body">
           <div class="tab-content">
-            <div class="tab-pane fade show active" id="input" role="tabpanel" aria-labelledby="input-tab">
+            <div class="tab-pane fade" id="input" role="tabpanel" aria-labelledby="input-tab">
               <h6 class="mb-2 text-muted">Choose one of the tabs below and follow the instructions for your selected input method.</h6>
 
               <div class="card">
@@ -261,7 +261,7 @@
               </div>
             </div>
 
-            <div class="tab-pane fade" id="config" role="tabpanel" aria-labelledby="config-tab">
+            <div class="tab-pane fade show active" id="config" role="tabpanel" aria-labelledby="config-tab">
               <h6 class="mb-2 text-muted">Adjust the map's center coordinates, if needed.</h6>
               <form class="row g-2" id="form">
                 <div class="col-sm-2">
@@ -284,20 +284,41 @@
                   <input type="number" class="form-control" id="inputCenterY" step=".5" />
                 </div>
 
-                <div class="col-sm-2">
+                <div class="col-sm-1">
                   <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="checkboxFlipX" />
                     <label class="form-check-label" for="checkboxFlipX"> Flip X </label>
                   </div>
                 </div>
 
-                <div class="col-sm-2">
+                <div class="col-sm-1">
                   <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="checkboxFlipY" />
                     <label class="form-check-label" for="checkboxFlipY"> Flip Y </label>
                   </div>
                 </div>
+
+                <div class="col-sm-1">
+                  <button class="btn btn-outline-secondary" type="button" id="buttonClone" title="Add a set of cloned LEDs">+ Clone</button>
+                </div>
+
+                <div class="col-sm-1">
+                  <button class="btn btn-outline-secondary" type="button" id="buttonDelete" title="Remove the last set of cloned LEDs">-</button>
+                </div>
               </form>
+
+              <form class="row g-2" id="formClone0" style="display: none;">
+                <div class="col-sm-2">
+                  <label for="inputXClone0" class="form-label" id="labelXClone0">Clone X</label>
+                  <input type="number" class="form-control" id="inputXClone0" step=".1" value="0" />
+                </div>
+
+                <div class="col-sm-2">
+                  <label for="inputYClone0" class="form-label" id="labelYClone0">Clone Y</label>
+                  <input type="number" class="form-control" id="inputYClone0" step=".1" value="0" />
+                </div>
+              </form>
+
             </div>
 
             <div class="tab-pane fade" id="output" role="tabpanel" aria-labelledby="output-tab">
